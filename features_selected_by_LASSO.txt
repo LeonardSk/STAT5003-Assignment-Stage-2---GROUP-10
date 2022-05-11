@@ -1,0 +1,5 @@
+"race"                  "gender"               
+ "age"                   "num_lab_procedures"    "diag_3"               
+"number_diagnoses"      "glipizide"             "pioglitazone"         
+ "rosiglitazone"         "insulin"               "admission_source"     
+ "discharge_disposition" "admission_type"
