@@ -1,0 +1,259 @@
+---
+title: "5003 assignment 2 HL"
+author: "Hui Li"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(caret)
+library(randomForest)
+library(ranger)
+library(ggplot2)
+library(tictoc)
+library(data.table)
+library(ordinalForest)
+```
+
+## 1. Load data
+
+```{r}
+train_raw <- read.csv("train_raw.csv", header = TRUE)
+test_raw <- read.csv("test_raw.csv", header = TRUE)
+```
+
+
+## 2.check feature type and convert character feature to factor
+
+
+```{r}
+# Check feature type of train_raw data
+#str(train_raw)
+
+# Convert character to factor in train_raw data
+train_raw$race <- factor(train_raw$race)
+train_raw$gender <- factor(train_raw$gender)
+train_raw$age <- factor(train_raw$age, order = TRUE, levels = c("[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"))
+train_raw$diag_1 <- factor(train_raw$diag_1 )
+train_raw$diag_2 <- factor(train_raw$diag_2)
+train_raw$diag_3 <- factor(train_raw$diag_3)
+train_raw$A1Cresult <- factor(train_raw$A1Cresult)
+train_raw$metformin <- factor(train_raw$metformin)
+train_raw$glipizide <- factor(train_raw$glipizide)
+train_raw$glyburide <- factor(train_raw$glyburide)
+train_raw$pioglitazone <- factor(train_raw$pioglitazone)
+train_raw$rosiglitazone <- factor(train_raw$rosiglitazone)
+train_raw$insulin  <- factor(train_raw$insulin )
+train_raw$change <- factor(train_raw$change)
+train_raw$diabetesMed <- factor(train_raw$diabetesMed)
+train_raw$readmitted <- factor(train_raw$readmitted, order = TRUE, levels = c("NO", ">30", "<30"))
+train_raw$admission_source <- factor(train_raw$admission_source)
+train_raw$discharge_disposition <- factor(train_raw$discharge_disposition)
+train_raw$admission_type <- factor(train_raw$admission_type)
+
+# Check feature type in train_raw data after conversion
+# str(train_raw)
+
+# Convert character to factor in test_raw data
+test_raw$race <- factor(test_raw$race)
+test_raw$gender <- factor(test_raw$gender)
+test_raw$age <- factor(test_raw$age, order = TRUE, levels = c("[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"))
+test_raw$diag_1 <- factor(test_raw$diag_1 )
+test_raw$diag_2 <- factor(test_raw$diag_2)
+test_raw$diag_3 <- factor(test_raw$diag_3)
+test_raw$A1Cresult <- factor(test_raw$A1Cresult)
+test_raw$metformin <- factor(test_raw$metformin)
+test_raw$glipizide <- factor(test_raw$glipizide)
+test_raw$glyburide <- factor(test_raw$glyburide)
+test_raw$pioglitazone <- factor(test_raw$pioglitazone)
+test_raw$rosiglitazone <- factor(test_raw$rosiglitazone)
+test_raw$insulin  <- factor(test_raw$insulin )
+test_raw$change <- factor(test_raw$change)
+test_raw$diabetesMed <- factor(test_raw$diabetesMed)
+test_raw$readmitted <- factor(test_raw$readmitted, order = TRUE, levels = c("NO", ">30", "<30"))
+test_raw$admission_source <- factor(test_raw$admission_source)
+test_raw$discharge_disposition <- factor(test_raw$discharge_disposition)
+test_raw$admission_type <- factor(test_raw$admission_type)
+
+```
+
+
+
+
+## 3. Using randomForest() with train_raw data
+
+
+```{r}
+# Fit random forest model
+tic()
+set.seed(123)
+randomforest_model_train_raw <- randomForest(readmitted ~ ., data = train_raw)
+randomforest_model_train_raw
+
+# Predict test data
+pred_rf_test_train_raw <- predict(randomforest_model_train_raw, newdata = test_raw)
+pred_rf_test_train_raw <- factor(pred_rf_test_train_raw, order = TRUE, levels = c("NO", ">30", "<30"))
+
+#Evaluate prediction 
+confusionMatrix(pred_rf_test_train_raw, test_raw$readmitted)
+toc()
+```
+
+
+
+## 1.2.2 using range() 
+
+
+```{r}
+tic()
+set.seed(123)
+# Fit model using rager
+ranger_model_train_raw <- ranger (readmitted ~., data = train_raw)
+ranger_model_train_raw
+
+
+# Predict test data
+pred_rg_test_train_raw <- predict(ranger_model_train_raw, data = test_raw)
+pred_rg_test_train_raw_pred <- factor(pred_rg_test_train_raw$predictions, order = TRUE, levels = c("NO", ">30", "<30"))
+
+#Evaluate prediction 
+confusionMatrix(pred_rg_test_train_raw_pred, test_raw$readmitted, mode = "everything")
+toc()
+```
+
+
+## Optional:Using selected features only
+
+```{r}
+## Selected feature only
+train_raw_sub <- train_raw[,c("race","gender","age","num_lab_procedures","diag_3","number_diagnoses","glipizide","pioglitazone","rosiglitazone", "insulin","admission_source", "discharge_disposition","admission_type", "readmitted")]
+
+test_raw_sub <- test_raw[,c("race","gender","age","num_lab_procedures","diag_3","number_diagnoses","glipizide","pioglitazone","rosiglitazone", "insulin","admission_source", "discharge_disposition","admission_type", "readmitted")]
+
+# Fit random forest model
+tic()
+set.seed(123)
+randomforest_model_train_raw_sub <- randomForest(readmitted ~ ., data = train_raw_sub)
+randomforest_model_train_raw_sub
+toc()
+
+# Predict test data
+
+pred_rf_test_train_raw_sub <- predict(randomforest_model_train_raw_sub, newdata = test_raw_sub)
+pred_rf_test_train_raw_sub <- factor(pred_rf_test_train_raw_sub, order = TRUE, levels = c("NO", ">30", "<30"))
+
+#Evaluate prediction 
+confusionMatrix(pred_rf_test_train_raw_sub, test_raw_sub$readmitted)
+
+```
+
+
+
+## Ordinal forest with some raw data
+```{r}
+# Subset of data
+
+train_raw_some <- train_raw[0:5000,]
+
+
+# Ordinal tree model
+tic()
+ordforres_model_train_raw_some <- ordfor(depvar="readmitted", data=train_raw_some)
+ordforres_model_train_raw_some
+toc()
+```
+```{r}
+sort(ordforres_model_train_raw_some$varimp, decreasing = TRUE)
+```
+
+
+
+```{r}
+# Predict test data
+pred_of_test_train_raw_some <- predict(ordforres_model_train_raw_some, newdata = test_raw)
+
+
+#Evaluate prediction 
+confusionMatrix(pred_of_test_train_raw_some$ypred, test_raw$readmitted)
+```
+
+
+## Ordinal forest with downsample
+
+```{r}
+# Downsample to balance labels
+#train_raw_down <- downSample(subset(train_raw, select = -readmitted), train_raw$readmitted)
+
+# Change label back to readmitted
+#colnames(train_raw_down)[which(names(train_raw_down) == "Class")] <- "readmitted"
+
+# Ordinal tree model
+tic()
+ordforres_model_train_raw_down <- ordfor(depvar="readmitted", data=train_raw_down)
+ordforres_model_train_raw_down
+toc()
+
+
+```
+```{r}
+#Check important variables
+sort(ordforres_model_train_raw_down$varimp, decreasing = TRUE)
+
+# Predict test data
+pred_of_test_train_raw_down <- predict(ordforres_model_train_raw_down, newdata = test_raw)
+
+
+#Evaluate prediction 
+confusionMatrix(pred_of_test_train_raw_down$ypred, test_raw$readmitted)
+```
+
+
+## random forest with down sample
+
+```{r}
+# Fit random forest model
+tic()
+set.seed(123)
+randomforest_model_train_raw_down <- randomForest(readmitted ~ ., data = train_raw_down)
+randomforest_model_train_raw_down
+
+# Predict test data
+pred_rf_test_train_raw_down <- predict(randomforest_model_train_raw_down, newdata = test_raw)
+pred_rf_test_train_raw_down <- factor(pred_rf_test_train_raw_down, order = TRUE, levels = c("NO", ">30", "<30"))
+
+#Evaluate prediction 
+confusionMatrix(pred_rf_test_train_raw_down, test_raw$readmitted)
+toc()
+```
+
+## ranger with downsample
+
+
+```{r}
+tic()
+
+# Downsample to balance labels
+train_raw_down <- downSample(subset(train_raw, select = -readmitted), train_raw$readmitted)
+
+# Change label back to readmitted
+colnames(train_raw_down)[which(names(train_raw_down) == "Class")] <- "readmitted"
+
+set.seed(123)
+# Fit model using rager
+ranger_model_train_raw_down <- ranger (readmitted ~., data = train_raw_down)
+ranger_model_train_raw_down
+
+
+# Predict test data
+pred_rg_test_train_raw_down <- predict(ranger_model_train_raw_down, data = test_raw)
+pred_rg_test_train_raw_down <- factor(pred_rg_test_train_raw_down$predictions, order = TRUE, levels = c("NO", ">30", "<30"))
+
+#Evaluate prediction 
+confusionMatrix(pred_rg_test_train_raw_down, test_raw$readmitted, mode = "everything")
+toc()
+```

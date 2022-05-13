@@ -1,0 +1,106 @@
+---
+title: "Random forest rep data"
+author: "Hui Li"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(caret)
+library(randomForest)
+library(ranger)
+library(ggplot2)
+library(tictoc)
+library(data.table)
+library(ordinalForest)
+```
+
+## 1. Load data
+
+```{r}
+train_rep_oversampled <- read.csv("train_rep_oversampled.csv", header = TRUE)
+test_raw <- read.csv("test_raw.csv", header = TRUE)
+```
+
+
+## 2.check feature type and convert character feature to factor
+
+
+```{r}
+# Check feature type of train_raw data
+#str(train_raw)
+
+# Convert character to factor in train_raw data
+train_rep_oversampled$race <- factor(train_rep_oversampled$race)
+train_rep_oversampled$gender <- factor(train_rep_oversampled$gender)
+train_rep_oversampled$age <- factor(train_rep_oversampled$age, order = TRUE, levels = c("[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"))
+train_rep_oversampled$diag_1 <- factor(train_rep_oversampled$diag_1 )
+train_rep_oversampled$diag_2 <- factor(train_rep_oversampled$diag_2)
+train_rep_oversampled$diag_3 <- factor(train_rep_oversampled$diag_3)
+train_rep_oversampled$A1Cresult <- factor(train_rep_oversampled$A1Cresult)
+train_rep_oversampled$metformin <- factor(train_rep_oversampled$metformin)
+train_rep_oversampled$glipizide <- factor(train_rep_oversampled$glipizide)
+train_rep_oversampled$glyburide <- factor(train_rep_oversampled$glyburide)
+train_rep_oversampled$pioglitazone <- factor(train_rep_oversampled$pioglitazone)
+train_rep_oversampled$rosiglitazone <- factor(train_rep_oversampled$rosiglitazone)
+train_rep_oversampled$insulin  <- factor(train_rep_oversampled$insulin )
+train_rep_oversampled$change <- factor(train_rep_oversampled$change)
+train_rep_oversampled$diabetesMed <- factor(train_rep_oversampled$diabetesMed)
+train_rep_oversampled$readmitted <- factor(train_rep_oversampled$readmitted, order = TRUE, levels = c("NO", ">30", "<30"))
+train_rep_oversampled$admission_source <- factor(train_rep_oversampled$admission_source)
+train_rep_oversampled$discharge_disposition <- factor(train_rep_oversampled$discharge_disposition)
+train_rep_oversampled$admission_type <- factor(train_rep_oversampled$admission_type)
+
+# Check feature type in train_raw data after conversion
+# str(train_raw)
+
+# Convert character to factor in test_raw data
+test_raw$race <- factor(test_raw$race)
+test_raw$gender <- factor(test_raw$gender)
+test_raw$age <- factor(test_raw$age, order = TRUE, levels = c("[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"))
+test_raw$diag_1 <- factor(test_raw$diag_1 )
+test_raw$diag_2 <- factor(test_raw$diag_2)
+test_raw$diag_3 <- factor(test_raw$diag_3)
+test_raw$A1Cresult <- factor(test_raw$A1Cresult)
+test_raw$metformin <- factor(test_raw$metformin)
+test_raw$glipizide <- factor(test_raw$glipizide)
+test_raw$glyburide <- factor(test_raw$glyburide)
+test_raw$pioglitazone <- factor(test_raw$pioglitazone)
+test_raw$rosiglitazone <- factor(test_raw$rosiglitazone)
+test_raw$insulin  <- factor(test_raw$insulin )
+test_raw$change <- factor(test_raw$change)
+test_raw$diabetesMed <- factor(test_raw$diabetesMed)
+test_raw$readmitted <- factor(test_raw$readmitted, order = TRUE, levels = c("NO", ">30", "<30"))
+test_raw$admission_source <- factor(test_raw$admission_source)
+test_raw$discharge_disposition <- factor(test_raw$discharge_disposition)
+test_raw$admission_type <- factor(test_raw$admission_type)
+
+```
+
+
+## 3. Using randomForest() with train_rep_oversampled data
+
+
+```{r}
+# Fit random forest model using ranger
+tic()
+set.seed(123)
+randomforest_model_train_rep_oversampled <- ranger(readmitted ~ ., data = train_rep_oversampled)
+randomforest_model_train_rep_oversampled
+
+# Predict test data
+pred_rf_test_train_rep_oversampled <- predict(randomforest_model_train_rep_oversampled, data = test_raw)
+pred_rf_test_train_rep_oversampled <- factor(pred_rf_test_train_rep_oversampled$predictions, order = TRUE, levels = c("NO", ">30", "<30"))
+
+#Evaluate prediction 
+confusionMatrix(pred_rf_test_train_rep_oversampled, test_raw$readmitted, mode = "everything")
+toc()
+```
