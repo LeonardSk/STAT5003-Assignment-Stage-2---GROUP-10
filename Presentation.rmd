@@ -17,7 +17,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Slide 1
 
-Problem Space - Simon and Hui 
+```{r, out.width = "700px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/Diabetes_intro.png")
+```
+
 
 ---
 
@@ -70,17 +73,26 @@ Feature selection - Macy
 
 ---
 
-## Slide 9
+## *k*-nearest neighbours tuning
 
-Model 1 - KNN
-methodology
+<!-- Speech (to delete): We first consider the k Nearest Neighbours method. -->
+<!-- To tune the hyperparameter k for best accuracy while minimizing computational time, we adopt the heuristic that the best k is approximately equal to root N where N is the number of points. -->
+<!-- By iterating around this value, we obtain our best k estimate. -->
+
+```{r, out.width = "900px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/knn_method.png")
+```
 
 ---
 
-## Slide 10
+## *k*-nearest neighbours results
 
-Model 1 - KNN
-Results
+<!-- Looking at this heatmap visualisation of the confusion matrix, we find that the kNN model fails to predict any instances of the ‘<30’ class in the test set.  -->
+<!-- Second, the model fails to be sensitive to readmissions, which is critical to the goal of our project. -->
+
+```{r, out.width = "1200px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/CM_plot_table.png")
+```
 
 ---
 
