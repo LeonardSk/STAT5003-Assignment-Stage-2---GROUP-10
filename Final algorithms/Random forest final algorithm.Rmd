@@ -88,7 +88,7 @@ test_raw$admission_type <- factor(test_raw$admission_type)
 tic()
 set.seed(123)
 # Fit model using ranger
-ranger_model_train_down <- ranger (readmitted ~., data = train_down,  num.trees = 8000, mtry = 2, importance = "impurity_corrected")
+ranger_model_train_down <- ranger (readmitted ~., data = train_down,  num.trees = 8000, mtry = 2, importance = "impurity_corrected") 
 ranger_model_train_down
 importance_pvalues(ranger_model_train_down, method = "janitza")
 
@@ -102,5 +102,12 @@ pred_rg_test_train_down_pred <- factor(pred_rg_test_train_down$predictions, orde
 confusionMatrix(pred_rg_test_train_down_pred, test_raw$readmitted, mode = "everything")
 toc()
 ```
+
+## 4. RDS file
+
+```{r}
+saveRDS(ranger_model_train_down, "Randomforest_model_fit.rds")
+```
+
 
 
