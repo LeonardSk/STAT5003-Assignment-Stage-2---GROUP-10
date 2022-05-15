@@ -1,0 +1,106 @@
+---
+title: "Random forest raw data down sample"
+author: "Hui Li"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(caret)
+library(ranger)
+library(tictoc)
+library(data.table)
+library(dplyr)
+```
+
+## 1. Load data
+
+```{r}
+train_down <- read.csv("train_down.csv", header = TRUE)
+train_down <- select(train_down, -1)
+test_raw <- read.csv("test_raw.csv", header = TRUE)
+```
+
+
+## 2.check feature type and convert character feature to factor
+
+
+```{r}
+# Check feature type of train_down data
+#str(train_down)
+
+# Convert character to factor in train_down data
+train_down$race <- factor(train_down$race)
+train_down$gender <- factor(train_down$gender)
+train_down$age <- factor(train_down$age, order = TRUE, levels = c("[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"))
+train_down$diag_1 <- factor(train_down$diag_1 )
+train_down$diag_2 <- factor(train_down$diag_2)
+train_down$diag_3 <- factor(train_down$diag_3)
+train_down$A1Cresult <- factor(train_down$A1Cresult)
+train_down$metformin <- factor(train_down$metformin)
+train_down$glipizide <- factor(train_down$glipizide)
+train_down$glyburide <- factor(train_down$glyburide)
+train_down$pioglitazone <- factor(train_down$pioglitazone)
+train_down$rosiglitazone <- factor(train_down$rosiglitazone)
+train_down$insulin  <- factor(train_down$insulin )
+train_down$change <- factor(train_down$change)
+train_down$diabetesMed <- factor(train_down$diabetesMed)
+train_down$readmitted <- factor(train_down$readmitted, order = TRUE, levels = c("NO", ">30", "<30"))
+train_down$admission_source <- factor(train_down$admission_source)
+train_down$discharge_disposition <- factor(train_down$discharge_disposition)
+train_down$admission_type <- factor(train_down$admission_type)
+
+# Check feature type in train_train_down data after conversion
+# str(train_down)
+
+# Convert character to factor in train_down data
+test_raw$race <- factor(test_raw$race)
+test_raw$gender <- factor(test_raw$gender)
+test_raw$age <- factor(test_raw$age, order = TRUE, levels = c("[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"))
+test_raw$diag_1 <- factor(test_raw$diag_1 )
+test_raw$diag_2 <- factor(test_raw$diag_2)
+test_raw$diag_3 <- factor(test_raw$diag_3)
+test_raw$A1Cresult <- factor(test_raw$A1Cresult)
+test_raw$metformin <- factor(test_raw$metformin)
+test_raw$glipizide <- factor(test_raw$glipizide)
+test_raw$glyburide <- factor(test_raw$glyburide)
+test_raw$pioglitazone <- factor(test_raw$pioglitazone)
+test_raw$rosiglitazone <- factor(test_raw$rosiglitazone)
+test_raw$insulin  <- factor(test_raw$insulin )
+test_raw$change <- factor(test_raw$change)
+test_raw$diabetesMed <- factor(test_raw$diabetesMed)
+test_raw$readmitted <- factor(test_raw$readmitted, order = TRUE, levels = c("NO", ">30", "<30"))
+test_raw$admission_source <- factor(test_raw$admission_source)
+test_raw$discharge_disposition <- factor(test_raw$discharge_disposition)
+test_raw$admission_type <- factor(test_raw$admission_type)
+
+```
+
+
+## 3.Fit ranger model with best hyperparameters 
+
+```{r}
+tic()
+set.seed(123)
+# Fit model using ranger
+ranger_model_train_down <- ranger (readmitted ~., data = train_down,  num.trees = 8000, mtry = 2, importance = "impurity_corrected")
+ranger_model_train_down
+importance_pvalues(ranger_model_train_down, method = "janitza")
+
+
+
+# Predict test data
+pred_rg_test_train_down <- predict(ranger_model_train_down, data = test_raw)
+pred_rg_test_train_down_pred <- factor(pred_rg_test_train_down$predictions, order = TRUE, levels = c("NO", ">30", "<30"))
+
+#Evaluate prediction 
+confusionMatrix(pred_rg_test_train_down_pred, test_raw$readmitted, mode = "everything")
+toc()
+```
+
+
