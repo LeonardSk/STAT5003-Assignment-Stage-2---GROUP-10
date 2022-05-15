@@ -1,0 +1,157 @@
+---
+title: "Group 10 Presentation"
+author: "Group 10"
+date: "18th May 2021"
+output: 
+  xaringan::moon_reader:
+    seal: true # show a title slide with YAML information
+    nature:
+      ratio: '16:9' # alternatives '16:9' or '4:3' or others e.g. 13:9
+      autoplay: 20000
+      countdown: 20000 # Can use the countdown to practice
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Slide 1
+
+Problem Space - Simon and Hui 
+
+---
+
+
+## Slide 2
+
+Introduction of the dataset - Jenny
+
+---
+
+
+## Slide 3
+
+Challenge of data - Jenny
+
+---
+
+
+## Slide 4
+
+IDA - missingness, low information columns, correlation - Macy
+
+---
+
+
+## Slide 5
+
+IDA - data cleaning - Leonard
+
+---
+
+
+## Slide 6
+
+train/test split
+Imbalanced Class - Macy
+
+---
+
+
+## Slide 7
+
+Treating Imbalanced class - Macy
+
+---
+
+## Slide 8
+
+Feature selection - Macy
+
+---
+
+## Slide 9
+
+Model 1 - KNN
+methodology
+
+---
+
+## Slide 10
+
+Model 1 - KNN
+Results
+
+---
+
+## Slide 11
+
+Model 2 - Random Forest
+Methodology
+
+
+---
+
+## Slide 12
+
+Model 2 - Random Forest
+Results
+
+---
+
+## Slide 13
+
+Model 3 - SVM
+Methodology
+
+---
+
+## Slide 14
+
+Model 3 - SVM
+Results
+
+---
+
+## Slide 15
+
+Model 4 - Logistic Regression
+Methodology
+
+---
+
+## Slide 16
+
+Model 4 - Logistic Regression
+Results
+
+---
+
+## Slide 17
+
+Model 5 - Decision Tree/GBM
+Methodology
+
+---
+
+## Slide 18
+
+Model 5 - Decision Tree/GBM
+Results
+
+---
+
+## Slide 19
+
+Conclusion - which model performs the best - Leonard
+
+---
+
+## Slide 20
+
+Future improvement - Jenny and Hui
+
+
+
+
+
