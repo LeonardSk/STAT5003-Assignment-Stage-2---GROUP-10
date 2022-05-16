@@ -15,10 +15,19 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Slide 1
+## Problem
+
+<!-- The prevalence of diabetes is growing rapidly all over the world. -->
+
+<!-- Hospitalized diabetes patients have a higher risk of hospital readmission after discharge from hospital. -->
+
+<!-- This generates significant burden to the patients and the health care system. -->
+
+<!-- Identifying this group of patients will improve the management of the high readmission rate. -->
+
 
 ```{r, out.width = "700px", echo=FALSE, fig.align="center"}
-knitr::include_graphics("Images/Diabetes_intro.png")
+knitr::include_graphics("Images/Problem.png")
 ```
 
 
@@ -29,12 +38,27 @@ knitr::include_graphics("Images/Diabetes_intro.png")
 
 Introduction of the dataset - Jenny
 
+<!-- Speech (to delete): The dataset we chose for the study represents 10 years of hospital admission cases for patients diagnosed with diabetes. There’re 55 categorical and numerical features that cover a variety of demographical and clinical data. Our goal is to build a model that discriminate patients readmitted within 30 days of discharge against patients readmitted after 30 days or never come back.
+-->
+
+```{r, out.width = "900px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/dataset_intro.png")
+```
+
 ---
 
 
 ## Slide 3
 
 Challenge of data - Jenny
+
+<!-- Speech (to delete): The key challenges for the analysis include: 1) Big data – there’s over 100k observations in our data, which means longer execution time and higher computational cost; 2) data is messy and requires proper cleaning in order to filter outliers, remove duplications and handle missing data; 3) the problem we’re solving is to build a multi-class classifier, which is extension from building a binary model; 4) the classes are imbalanced, thus requires further balancing.
+
+-->
+
+```{r, out.width = "900px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/challenges_2.png")
+```
 
 ---
 
@@ -103,11 +127,16 @@ knitr::include_graphics("Images/CM_plot_table.png")
 
 ---
 
-## Slide 11
+## Random Forest Methodology
 
 Model 2 - Random Forest
 Methodology
 
+<!-- Then we built a random forest model, we firstly tried different dataset to balance the class, and found only down sample data was able to pick up the minority class group. Then we tried different functions and features, and performed hyper-parameter tuning. (with or without: The red highlights indicate tests with best performance.) -->
+
+```{r, out.width = "1200px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/Random forest methodology.png")
+```
 
 ---
 
@@ -136,6 +165,13 @@ Results
 
 Model 4 - Logistic Regression
 Methodology
+
+<!-- Speech (to delete): We then fit multinomial logistic regression, which uses maximum likelihood estimation to evaluate the probability of class membership. We applied different combination of up/down sampling and feature selection technique. Model based on raw data and all features gives the best accuracy of around 54%, however like KNN model, sensitivity and specificity for the prediction is highly skewed, with no instances predicted to be in <30 days class. 
+-->
+
+```{r, out.width = "900px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/logistic_regression_1.png")
+```
 
 ---
 
