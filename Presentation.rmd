@@ -39,9 +39,11 @@ Challenge of data - Jenny
 ---
 
 
-## Slide 4
+## IDA - Missingness, Outlier, Correlation and Low information features
 
-IDA - missingness, low information columns, correlation - Macy
+```{r, out.width = "900px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/IDA_slide.png")
+```
 
 ---
 
@@ -53,23 +55,28 @@ IDA - data cleaning - Leonard
 ---
 
 
-## Slide 6
+## Imbalanced Class
 
-train/test split
-Imbalanced Class - Macy
-
----
-
-
-## Slide 7
-
-Treating Imbalanced class - Macy
+```{r, out.width = "900px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/Imbalanced_class_slide.png")
+```
 
 ---
 
-## Slide 8
 
-Feature selection - Macy
+## Treating Imbalanced Class
+
+```{r, out.width = "900px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/down_over_sampling_slide.png")
+```
+
+---
+
+## Feature Selection
+
+```{r, out.width = "900px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/Feature_selection_slide.png")
+```
 
 ---
 

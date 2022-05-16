@@ -1,0 +1,406 @@
+---
+title: "Group 10 STAT5003 Assignment Stage 2"
+author: "Group 10"
+date: "`r Sys.Date()`"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+seed.value <- 500310
+set.seed(seed.value)
+
+install.custom <- function(package.name){
+  if(!(package.name %in% row.names(installed.packages()))){
+    install.packages(package.name)
+  } else {
+    print(paste0(package.name, " is already installed."))
+  }
+  library(package.name, character.only = T)
+}
+
+install.custom("purrr")
+package_list <- c("broom"
+                  , "ggplot2"
+                  ,"tidyverse"
+                  , "lubridate"
+                  , "knitr"
+                  , "janitor"
+                  , "gridExtra"
+                  , "sf"
+                  , "dplyr"
+                  , "ggpubr"
+                  , "patchwork"
+                  , "corrplot"
+                  , "ggcorrplot"
+                  , "matrixStats"
+                  , "naniar"
+                  , "devtools"
+                  , "datapasta" 
+                  , "data.table"
+                  , "dtplyr"
+                  , "tidymodels"
+                  , "xgboost"
+                  , "vip"
+                  , "GGally"
+                  , "glmnet"
+                  , "ggthemes"
+                  , "tidytext"
+                  , "rmarkdown"
+                  , "openxlsx"
+                  #, "xlsx"
+                  , "Hmisc"
+                  , "mice"
+                  , "corrplot"
+                  , "missForest"
+                  )
+
+map(package_list, ~install.custom(.x))
+```
+
+# Read in data
+
+```{r}
+df.raw.train <- read_csv("data/train_raw.csv")
+df.rep.train <- read_csv("data/train_rep_oversampled.csv")
+train_smote_oversampled <- read_csv("data/train_SMOTE_oversampled.csv")
+
+test_raw <- read_csv("data/test_raw.csv")
+```
+
+# Data conversion
+
+```{r}
+# Convert character to factor in test_raw data
+test_raw$race <- factor(test_raw$race)
+test_raw$gender <- factor(test_raw$gender)
+test_raw$age <- factor(test_raw$age, order = TRUE, levels = c("[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"))
+test_raw$diag_1 <- factor(test_raw$diag_1 )
+test_raw$diag_2 <- factor(test_raw$diag_2)
+test_raw$diag_3 <- factor(test_raw$diag_3)
+test_raw$A1Cresult <- factor(test_raw$A1Cresult)
+test_raw$metformin <- factor(test_raw$metformin)
+test_raw$glipizide <- factor(test_raw$glipizide)
+test_raw$glyburide <- factor(test_raw$glyburide)
+test_raw$pioglitazone <- factor(test_raw$pioglitazone)
+test_raw$rosiglitazone <- factor(test_raw$rosiglitazone)
+test_raw$insulin  <- factor(test_raw$insulin )
+test_raw$change <- factor(test_raw$change)
+test_raw$diabetesMed <- factor(test_raw$diabetesMed)
+test_raw$readmitted <- factor(test_raw$readmitted, order = TRUE, levels = c("NO", ">30", "<30"))
+test_raw$admission_source <- factor(test_raw$admission_source)
+test_raw$discharge_disposition <- factor(test_raw$discharge_disposition)
+test_raw$admission_type <- factor(test_raw$admission_type)
+
+# Convert dummy variables to characteristic variables
+# Race
+dfrace <- structure(list(train_smote_oversampled$raceAfricanAmerican,
+                         train_smote_oversampled$raceCaucasian, 
+                         train_smote_oversampled$raceOther),
+                    .Names = c("AfricanAmerican", "Caucasian", "Other"),
+                    class = "data.frame",
+                    row.names = 1:142117)
+train_smote_oversampled$race <- names(dfrace)[max.col(dfrace)]
+
+# gender
+dfgender <- structure(list(train_smote_oversampled$genderFemale,
+                           train_smote_oversampled$genderMale),
+                      .Names = c("Female", "Male"),
+                      class = "data.frame",
+                      row.names = 1:142117)
+train_smote_oversampled$gender <- names(dfgender)[max.col(dfgender)]
+
+# age
+dfage <- structure(list(train_smote_oversampled$age.0.10.,
+                        train_smote_oversampled$age.10.20., 
+                        train_smote_oversampled$age.20.30.,
+                        train_smote_oversampled$age.30.40.,
+                        train_smote_oversampled$age.40.50.,
+                        train_smote_oversampled$age.50.60.,
+                        train_smote_oversampled$age.60.70.,
+                        train_smote_oversampled$age.70.80.,
+                        train_smote_oversampled$age.80.90.,
+                        train_smote_oversampled$age.90.100.),
+                   .Names = c("[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)",
+                              "[70-80)", "[80-90)", "[90-100)"),
+                   class = "data.frame",
+                   row.names = 1:142117)
+train_smote_oversampled$age <- names(dfage)[max.col(dfage)]
+
+#diag_1
+dfdiag1 <- structure(list(train_smote_oversampled$diag_1Circulatory,
+                          train_smote_oversampled$diag_1Diabetes,
+                          train_smote_oversampled$diag_1Digestive,
+                          train_smote_oversampled$diag_1Genitourinary,
+                          train_smote_oversampled$diag_1Injury,
+                          train_smote_oversampled$diag_1Musculoskeletal,
+                          train_smote_oversampled$diag_1Neoplasms,
+                          train_smote_oversampled$diag_1Other ,
+                          train_smote_oversampled$diag_1Respiratory),
+                     .Names = c("Circulatory", "Diabetes", "Digestive", "Genitourinary", "Injury",
+                                "Musculoskeletal", "Neoplasms", "Other", "Respiratory"),
+                     class = "data.frame",
+                     row.names = 1:142117)
+train_smote_oversampled$diag_1 <- names(dfdiag1)[max.col(dfdiag1)]
+
+# diag_2
+dfdiag2 <- structure(list(train_smote_oversampled$diag_2Circulatory,
+                          train_smote_oversampled$diag_2Diabetes,
+                          train_smote_oversampled$diag_2Digestive,
+                          train_smote_oversampled$diag_2Genitourinary,
+                          train_smote_oversampled$diag_2Injury,
+                          train_smote_oversampled$diag_2Musculoskeletal,
+                          train_smote_oversampled$diag_2Neoplasms,
+                          train_smote_oversampled$diag_2Other ,
+                          train_smote_oversampled$diag_2Respiratory),
+                     .Names = c("Circulatory", "Diabetes", "Digestive", "Genitourinary", "Injury",
+                                "Musculoskeletal", "Neoplasms", "Other", "Respiratory"),
+                     class = "data.frame",
+                     row.names = 1:142117)
+train_smote_oversampled$diag_2 <- names(dfdiag2)[max.col(dfdiag2)]
+
+# diag_3
+dfdiag3 <- structure(list(train_smote_oversampled$diag_3Circulatory,
+                          train_smote_oversampled$diag_3Diabetes,
+                          train_smote_oversampled$diag_3Digestive,
+                          train_smote_oversampled$diag_3Genitourinary,
+                          train_smote_oversampled$diag_3Injury,
+                          train_smote_oversampled$diag_3Musculoskeletal,
+                          train_smote_oversampled$diag_3Neoplasms,
+                          train_smote_oversampled$diag_3Other ,
+                          train_smote_oversampled$diag_3Respiratory),
+                     .Names = c("Circulatory", "Diabetes", "Digestive", "Genitourinary", "Injury",
+                                "Musculoskeletal", "Neoplasms", "Other", "Respiratory"),
+                     class = "data.frame",
+                     row.names = 1:142117)
+train_smote_oversampled$diag_3 <- names(dfdiag3)[max.col(dfdiag3)]
+
+# A1Cresult
+dfA1Cresult <- structure(list(train_smote_oversampled$A1Cresult.7,
+                              train_smote_oversampled$A1Cresult.8,
+                              train_smote_oversampled$A1CresultNone,
+                              train_smote_oversampled$A1CresultNorm),
+                         .Names = c(">7", ">8", "None", "Norm"),
+                         class = "data.frame",
+                         row.names = 1:142117)
+train_smote_oversampled$A1Cresult <- names(dfA1Cresult)[max.col(dfA1Cresult)]
+
+# metformin
+dfmetformin <- structure(list(train_smote_oversampled$metforminDown,
+                              train_smote_oversampled$metforminNo,
+                              train_smote_oversampled$metforminSteady,
+                              train_smote_oversampled$metforminUp),
+                         .Names = c("Down", "No", "Steady", "Up"),
+                         class = "data.frame",
+                         row.names = 1:142117)
+train_smote_oversampled$metformin <- names(dfmetformin)[max.col(dfmetformin)]
+
+# glipizide
+dfglipizide <- structure(list(train_smote_oversampled$glipizideDown,
+                              train_smote_oversampled$glipizideNo,
+                              train_smote_oversampled$glipizideSteady,
+                              train_smote_oversampled$glipizideUp),
+                         .Names = c("Down", "No", "Steady", "Up"),
+                         class = "data.frame",
+                         row.names = 1:142117)
+train_smote_oversampled$glipizide <- names(dfglipizide)[max.col(dfglipizide)]
+
+# glyburide
+dfglyburide <- structure(list(train_smote_oversampled$glyburideDown,
+                              train_smote_oversampled$glyburideNo,
+                              train_smote_oversampled$glyburideSteady,
+                              train_smote_oversampled$glyburideUp),
+                         .Names = c("Down", "No", "Steady", "Up"),
+                         class = "data.frame",
+                         row.names = 1:142117)
+train_smote_oversampled$glyburide <- names(dfglyburide)[max.col(dfglyburide)]
+
+# pioglitazone
+dfpioglitazone <- structure(list(train_smote_oversampled$pioglitazoneDown,
+                                 train_smote_oversampled$pioglitazoneNo,
+                                 train_smote_oversampled$pioglitazoneSteady,
+                                 train_smote_oversampled$pioglitazoneUp),
+                            .Names = c("Down", "No", "Steady", "Up"),
+                            class = "data.frame",
+                            row.names = 1:142117)
+train_smote_oversampled$pioglitazone <- names(dfpioglitazone)[max.col(dfpioglitazone)]
+
+# rosiglitazone
+dfrosiglitazone <- structure(list(train_smote_oversampled$rosiglitazoneDown,
+                                  train_smote_oversampled$rosiglitazoneNo,
+                                  train_smote_oversampled$rosiglitazoneSteady,
+                                  train_smote_oversampled$rosiglitazoneUp),
+                             .Names = c("Down", "No", "Steady", "Up"),
+                             class = "data.frame",
+                             row.names = 1:142117)
+train_smote_oversampled$rosiglitazone <- names(dfrosiglitazone)[max.col(dfrosiglitazone)]
+
+# insulin
+dfinsulin <- structure(list(train_smote_oversampled$insulinDown,
+                            train_smote_oversampled$insulinNo,
+                            train_smote_oversampled$insulinSteady,
+                            train_smote_oversampled$insulinUp),
+                       .Names = c("Down", "No", "Steady", "Up"),
+                       class = "data.frame",
+                       row.names = 1:142117)
+train_smote_oversampled$insulin <- names(dfinsulin)[max.col(dfinsulin)]
+
+# change
+dfchange <- structure(list(train_smote_oversampled$changeCh,
+                           train_smote_oversampled$changeNo),
+                      .Names = c("Ch", "No"),
+                      class = "data.frame",
+                      row.names = 1:142117)
+train_smote_oversampled$change <- names(dfchange)[max.col(dfchange)]
+
+# diabetesMed
+dfdiabetesMed <- structure(list(train_smote_oversampled$diabetesMedNo,
+                                train_smote_oversampled$diabetesMedYes),
+                           .Names = c("No", "Yes"),
+                           class = "data.frame",
+                           row.names = 1:142117)
+train_smote_oversampled$diabetesMed <- names(dfdiabetesMed)[max.col(dfdiabetesMed)]
+
+# admission_source
+dfadmission_source <- structure(list(train_smote_oversampled$admission_sourceEmergency.Room,
+                                     train_smote_oversampled$admission_sourceOther,
+                                    train_smote_oversampled$admission_sourcePhysician.and.Other.Referrals),
+                                .Names = c("Emergency Room", "Other", "Physician and Other Referrals"),
+                                class = "data.frame",
+                                row.names = 1:142117)
+train_smote_oversampled$admission_source <- names(dfadmission_source)[max.col(dfadmission_source)]
+
+# discharge_disposition
+dfdischarge_disposition <- structure(list(train_smote_oversampled$discharge_dispositionDischarged.to.home,
+                                          train_smote_oversampled$discharge_dispositionOther),
+                                     .Names = c("Discharged to home", "Other"),
+                                     class = "data.frame",
+                                     row.names = 1:142117)
+train_smote_oversampled$discharge_disposition <- names(dfdischarge_disposition)[max.col(dfdischarge_disposition)]
+
+# admission_type
+dfadmission_type <- structure(list(train_smote_oversampled$admission_typeElective,
+                                   train_smote_oversampled$admission_typeEmergency...Urgent,
+                                   train_smote_oversampled$admission_typeOther),
+                              .Names = c("Elective", "Emergency / Urgent", "Other"),
+                              class = "data.frame",
+                              row.names = 1:142117)
+train_smote_oversampled$admission_type <- names(dfadmission_type)[max.col(dfadmission_type)]
+
+# Convert character to factor 
+train_smote_oversampled$race <- factor(train_smote_oversampled$race)
+train_smote_oversampled$gender <- factor(train_smote_oversampled$gender)
+train_smote_oversampled$age <- factor(train_smote_oversampled$age, order = TRUE, levels = c("[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"))
+train_smote_oversampled$diag_1 <- factor(train_smote_oversampled$diag_1 )
+train_smote_oversampled$diag_2 <- factor(train_smote_oversampled$diag_2)
+train_smote_oversampled$diag_3 <- factor(train_smote_oversampled$diag_3)
+train_smote_oversampled$A1Cresult <- factor(train_smote_oversampled$A1Cresult)
+train_smote_oversampled$metformin <- factor(train_smote_oversampled$metformin)
+train_smote_oversampled$glipizide <- factor(train_smote_oversampled$glipizide)
+train_smote_oversampled$glyburide <- factor(train_smote_oversampled$glyburide)
+train_smote_oversampled$pioglitazone <- factor(train_smote_oversampled$pioglitazone)
+train_smote_oversampled$rosiglitazone <- factor(train_smote_oversampled$rosiglitazone)
+train_smote_oversampled$insulin  <- factor(train_smote_oversampled$insulin )
+train_smote_oversampled$change <- factor(train_smote_oversampled$change)
+train_smote_oversampled$diabetesMed <- factor(train_smote_oversampled$diabetesMed)
+train_smote_oversampled$readmitted <- factor(train_smote_oversampled$readmitted, order = TRUE, levels = c("NO", ">30", "<30"))
+train_smote_oversampled$admission_source <- factor(train_smote_oversampled$admission_source)
+train_smote_oversampled$discharge_disposition <- factor(train_smote_oversampled$discharge_disposition)
+train_smote_oversampled$admission_type <- factor(train_smote_oversampled$admission_type)
+
+# Select columns without dummy variables
+train_smote_oversampled <-train_smote_oversampled[-c(1:15, 20:46, 48:87)]
+```
+
+```{r}
+ggplot(train_smote_oversampled, aes(readmitted)) + geom_bar()
+```
+
+# GBM Model
+
+```{r}
+# Train_set <- train_smote_oversampled[sample(nrow(train_smote_oversampled), 100), ]
+Train_set <- train_smote_oversampled
+
+CV_set <- vfold_cv(Train_set, v=10)
+
+xgb.recipe <- recipe(
+  as.formula(
+    readmitted ~ .,
+  ),
+  data = Train_set
+) %>% 
+  step_dummy(all_nominal_predictors())
+
+xgb.model <- boost_tree() %>% 
+  set_args(
+    mtry = tune(),
+    trees = 500,
+    min_n = tune(),
+    tree_depth = tune(),
+    learn_rate = tune(),
+    loss_reduction = tune()
+  ) %>% 
+  set_engine("xgboost"
+             , objective="multi:softprob"
+             , num_class=3
+             ) %>% 
+  set_mode("classification")
+
+xgb.workflow <- workflow() %>% 
+  add_recipe(xgb.recipe) %>% 
+  add_model(xgb.model)
+  
+xgb.params <- parameters(
+  finalize(mtry(), Train_set),
+  min_n(),
+  tree_depth(),
+  learn_rate(),
+  loss_reduction()
+)
+  
+xgb.grid <- xgb.params %>% 
+  grid_max_entropy(
+    size = 50
+  )
+
+#install.custom("doParallel")
+doParallel::registerDoParallel()
+xgb.tune <- xgb.workflow %>% 
+  tune_grid(
+    resamples = CV_set ,
+    grid = xgb.grid,
+    control = control_grid(save_pred = TRUE)
+  )
+  
+```
+
+# Tuned metrics
+
+```{r}
+collect_metrics(xgb.tune)
+show_best(xgb.tune, "roc_auc")
+
+best_auc <- select_best(xgb.tune, "roc_auc")
+
+```
+
+# Final Model
+
+```{r}
+xgb.workflow.final <- xgb.workflow %>% 
+  finalize_workflow(best_auc)
+
+xgb.model.fit <- xgb.workflow.final %>% 
+  fit(data = Train_set)
+
+out_df <- data.frame(obs = Train_set$readmitted, preds = predict(xgb.model.fit, new_data = Train_set)$.pred_class) %>% 
+  mutate_if(is.factor, as.character)
+
+out_df %>% conf_mat(obs, preds)
+```
+
+
+
