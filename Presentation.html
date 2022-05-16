@@ -4,7 +4,7 @@
     <title>Group 10 Presentation</title>
     <meta charset="utf-8" />
     <meta name="author" content="Group 10" />
-    <script src="Presentation_files/header-attrs-2.11/header-attrs.js"></script>
+    <script src="Presentation_files/header-attrs-2.14/header-attrs.js"></script>
     <link href="Presentation_files/remark-css-0.0.1/default.css" rel="stylesheet" />
     <link href="Presentation_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
   </head>
@@ -27,24 +27,40 @@ class: center, middle, inverse, title-slide
 
 
 
-## Slide 1
+## Problem
 
-&lt;img src="Images/Diabetes_intro.png" width="700px" style="display: block; margin: auto;" /&gt;
+&lt;!-- The prevalence of diabetes is growing rapidly all over the world. --&gt;
+
+&lt;!-- Hospitalized diabetes patients have a higher risk of hospital readmission after discharge from hospital. --&gt;
+
+&lt;!-- This generates significant burden to the patients and the health care system. --&gt;
+
+&lt;!-- Identifying this group of patients will improve the management of the high readmission rate. --&gt;
+
+
+&lt;img src="Images/Problem.png" width="1000px" style="display: block; margin: auto;" /&gt;
 
 
 ---
 
 
-## Slide 2
+## Introduction of the dataset
 
-Introduction of the dataset - Jenny
+&lt;!-- Speech (to delete): The dataset we chose for the study represents 10 years of hospital admission cases for patients diagnosed with diabetes. There’re 55 categorical and numerical features that cover a variety of demographical and clinical data. Our goal is to build a model that discriminate patients readmitted within 30 days of discharge against patients readmitted after 30 days or never come back.
+--&gt;
+
+&lt;img src="Images/dataset_intro.png" width="900px" style="display: block; margin: auto;" /&gt;
 
 ---
 
 
-## Slide 3
+## Challenge of data
 
-Challenge of data - Jenny
+&lt;!-- Speech (to delete): The key challenges for the analysis include: 1) Big data – there’s over 100k observations in our data, which means longer execution time and higher computational cost; 2) data is messy and requires proper cleaning in order to filter outliers, remove duplications and handle missing data; 3) the problem we’re solving is to build a multi-class classifier, which is extension from building a binary model; 4) the classes are imbalanced, thus requires further balancing.
+
+--&gt;
+
+&lt;img src="Images/challenges_2.png" width="900px" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -101,11 +117,10 @@ IDA - data cleaning - Leonard
 
 ---
 
-## Slide 11
+## Random Forest Methodology
+&lt;!-- Then we built a random forest model, we firstly tried different dataset to balance the class, and found only down sample data was able to pick up the minority class group. Then we tried different functions and features, and performed hyper-parameter tuning. (with or without: The red highlights indicate tests with best performance.) --&gt;
 
-Model 2 - Random Forest
-Methodology
-
+&lt;img src="Images/Random forest methodology.png" width="950px" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -130,10 +145,12 @@ Results
 
 ---
 
-## Slide 15
+## Logistic Regression Methodology
 
-Model 4 - Logistic Regression
-Methodology
+&lt;!-- Speech (to delete): We then fit multinomial logistic regression, which uses maximum likelihood estimation to evaluate the probability of class membership. We applied different combination of up/down sampling and feature selection technique. Model based on raw data and all features gives the best accuracy of around 54%, however like KNN model, sensitivity and specificity for the prediction is highly skewed, with no instances predicted to be in &lt;30 days class. 
+--&gt;
+
+&lt;img src="Images/logistic_regression_1.png" width="900px" style="display: block; margin: auto;" /&gt;
 
 ---
 
