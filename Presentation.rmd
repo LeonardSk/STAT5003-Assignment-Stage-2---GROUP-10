@@ -15,10 +15,19 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Slide 1
+## Problem
+
+<!-- The prevalence of diabetes is growing rapidly all over the world. -->
+
+<!-- Hospitalized diabetes patients have a higher risk of hospital readmission after discharge from hospital. -->
+
+<!-- This generates significant burden to the patients and the health care system. -->
+
+<!-- Identifying this group of patients will improve the management of the high readmission rate. -->
+
 
 ```{r, out.width = "700px", echo=FALSE, fig.align="center"}
-knitr::include_graphics("Images/Diabetes_intro.png")
+knitr::include_graphics("Images/Problem.png")
 ```
 
 
@@ -103,11 +112,16 @@ knitr::include_graphics("Images/CM_plot_table.png")
 
 ---
 
-## Slide 11
+## Random Forest Methodology
 
 Model 2 - Random Forest
 Methodology
 
+<!-- Then we built a random forest model, we firstly tried different dataset to balance the class, and found only down sample data was able to pick up the minority class group. Then we tried different functions and features, and performed hyper-parameter tuning. (with or without: The red highlights indicate tests with best performance.) -->
+
+```{r, out.width = "1200px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/Random forest methodology.png")
+```
 
 ---
 
