@@ -45,7 +45,6 @@ knitr::include_graphics("Images/dataset_intro.png")
 
 ---
 
-
 ## Challenge of data
 
 <!-- Speech (to delete): The key challenges for the analysis include: 1) Big data – there’s over 100k observations in our data, which means longer execution time and higher computational cost; 2) data is messy and requires proper cleaning in order to filter outliers, remove duplications and handle missing data; 3) the problem we’re solving is to build a multi-class classifier, which is extension from building a binary model; 4) the classes are imbalanced, thus requires further balancing.
@@ -191,11 +190,14 @@ Conclusion - which model performs the best - Leonard
 
 ---
 
-## Slide 20
+## Future improvement
 
-Future improvement - Jenny and Hui
+<!-- There are several ways we can improve the performance of the model. Firstly, combine the two classes, patients readmitted within 30 days and  after 30 days, which have similar clinical meanings.
+We can also increase observation number, reduce categorical variable levels, adjust threshold for existing models, and try other classification algorithms.-->
 
 
-
+```{r, out.width = "900px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/Future improvement.png")
+```
 
 
