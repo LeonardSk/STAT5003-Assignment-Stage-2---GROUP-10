@@ -142,6 +142,13 @@ Results
 
 Model 3 - SVM
 Methodology
+<!-- In SVM, we also experimented with different datasets and different features. 
+We used Raw data, downsampled and Oversampled data that using SMOTE. 
+We also tried training on full features and selected only features.
+From those experiments, we found that by using SMOTE data, with all features, it yielded the best performance with test data. 
+
+These experiments used hyperparameters as follows 
+-->
 
 ---
 
@@ -149,6 +156,8 @@ Methodology
 
 Model 3 - SVM
 Results
+<!-- We fit the model with best hyperparameters, and got the average performance on 5-Fold is around 52%,
+Better than the other experiments which only got around 45%
 
 ---
 

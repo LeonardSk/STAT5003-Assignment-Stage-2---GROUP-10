@@ -1,0 +1,195 @@
+---
+title: "SVM downsampled data"
+author: "Johan Sentosa"
+date: '2022-05-15'
+output:
+  html_document:
+    fig_caption: no
+    number_sections: no
+    self_contained: yes
+    theme: flatly
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+# Import Libraries
+```{r}
+library(e1071)  # for svm
+library(caret)
+library(dplyr) 
+#library(CatEncoders)
+```
+
+
+
+# Load data
+```{r}
+diabetic.data <- read.csv('../data/train_down.csv', header=TRUE)
+diabetic.data = subset(diabetic.data, select = -c(X) )
+head(diabetic.data)
+#dim(diabetic.data)
+
+```
+
+```{r}
+#using selected feature only
+diabetic.data <- diabetic.data[,c("race","gender","age","num_lab_procedures","diag_3","number_diagnoses","glipizide","pioglitazone","rosiglitazone", "insulin","admission_source", "discharge_disposition","admission_type", "readmitted")]
+```
+
+
+```{r}
+dummy <- dummyVars(" ~ .", data=diabetic.data)
+oh.df.train <- data.frame(predict(dummy, newdata = diabetic.data))
+
+#getting label back
+#class1
+class1 <- subset(oh.df.train, oh.df.train$readmitted.30 == 1) #<30 
+class1 <- class1 %>% select(-c('readmitted.30.1', 'readmittedNO', 'readmitted.30'))
+class1$readmitted <- "<30"
+
+#class2
+class2 <- subset(oh.df.train, oh.df.train$readmittedNO == 1) #NO
+class2 <- class2 %>% select(-c('readmitted.30.1', 'readmitted.30','readmittedNO'))
+class2$readmitted <- "NO"
+
+#class3
+class3 <- subset(oh.df.train, oh.df.train$readmitted.30.1 == 1) #>30
+class3 <- class3 %>% select(-c('readmitted.30.1', 'readmitted.30','readmittedNO'))
+class3$readmitted <- ">30"
+
+#Combine all
+df_train <- rbind(class1, class2, class3)
+head(df_train)
+```
+
+
+```{r}
+df_train$readmitted <- factor(df_train$readmitted)
+
+head(df_train)
+#dim(df_train)
+```
+
+
+# Training K-Fold
+```{r from https://rpubs.com/markloessi/506713}
+
+start_time <- Sys.time()
+folds = createFolds(df_train$readmitted, k = 5)
+
+svm.output = lapply(folds, function(x) { # start of function
+  training_fold = df_train[-x, ]
+  test_fold = df_train[x, ]
+
+  classifier = svm(formula = readmitted ~ .,
+                   data = training_fold,
+                   type = 'C-classification',
+                   kernel = 'radial')
+  
+  x_test <- subset(test_fold, select = -readmitted )
+  y_pred <- predict(classifier, x_test)
+  y_true <- factor(test_fold$readmitted)
+
+  
+  return(list(predicted=y_pred, actual=y_true))
+})
+print(Sys.time()-start_time)
+```
+
+```{r}
+# Compute the performance metrics
+cm<-lapply(svm.output, function(x) confusionMatrix(x$actual, x$predicted))
+
+acc <- vapply(cm, function(c) c[["overall"]][["Accuracy"]], numeric(1))
+metrics <- c("Precision", "Recall","F1")
+metrics.by.class <- lapply(cm, function(c) c[["byClass"]][,metrics])
+
+get.macro.average <- function(c) {
+    re <- sum(c[, "Recall"]) / nrow(c)
+    pr <- sum(c[, "Precision"]) / nrow(c)
+    f1 <- sum(c[, "F1"]) / nrow(c)
+    return(list(Avg.Precision=pr, Avg.Recall=re, Avg.F1.Score=f1))
+}
+avg.metrics <- sapply(metrics.by.class, get.macro.average)
+all.metrics <- rbind(Accuracy=acc, avg.metrics)
+all.metrics
+saveRDS(all.metrics, file = "output/metrics_downsampled_data.rds")
+```
+
+```{r}
+saveRDS(all.metrics, file = "output/metrics_downsampled_data_selected.rds")
+
+#readRDS(file = "output/metrics_downsampled_data.rds")
+
+```
+
+# Predict test data
+```{r}
+test_raw <- read.csv('../data/test_raw.csv', header=TRUE)
+head(test_raw)
+```
+```{r}
+test_raw_lasso <- test_raw[,c("race","gender","age","num_lab_procedures","diag_3","number_diagnoses","glipizide","pioglitazone","rosiglitazone", "insulin","admission_source", "discharge_disposition","admission_type", "readmitted")]
+
+```
+
+```{r}
+dummy <- dummyVars(" ~ .", data=diabetic.data)
+oh.df.test <- data.frame(predict(dummy, newdata = test_raw))
+
+#getting label back
+#class1
+class1 <- subset(oh.df.test, oh.df.test$readmitted.30 == 1) #<30 
+class1 <- class1 %>% select(-c('readmitted.30.1', 'readmittedNO', 'readmitted.30'))
+class1$readmitted <- "<30"
+
+#class2
+class2 <- subset(oh.df.test, oh.df.test$readmittedNO == 1) #NO
+class2 <- class2 %>% select(-c('readmitted.30.1', 'readmitted.30','readmittedNO'))
+class2$readmitted <- "NO"
+
+#class3
+class3 <- subset(oh.df.test, oh.df.test$readmitted.30.1 == 1) #>30
+class3 <- class3 %>% select(-c('readmitted.30.1', 'readmitted.30','readmittedNO'))
+class3$readmitted <- ">30"
+
+#Combine all
+df_test <- rbind(class1, class2, class3)
+df_test$readmitted <- factor(df_test$readmitted)
+head(df_test)
+```
+
+
+```{r}
+start_time = Sys.time()
+
+classifier = svm(formula = readmitted ~ .,
+                   data = df_train,
+                   type = 'C-classification',
+                   kernel = 'linear')
+print(Sys.time()-start_time)
+
+```
+
+```{r}
+# Predict test data
+start_time = Sys.time()
+pred_svm_test_train_downsampled <- predict(classifier, newdata = df_test)
+pred_svm_test_train_downsampled <- factor(pred_svm_test_train_downsampled, order = TRUE, levels = c("NO", ">30", "<30"))
+print(Sys.time()-start_time)
+
+#Evaluate prediction 
+cm_test_downsampled <- confusionMatrix(pred_svm_test_train_downsampled, df_test$readmitted)
+cm_test_downsampled
+```
+```{r}
+saveRDS(cm_test_downsampled, file = "output/cm_test_downsampled_data_selected.rds")
+
+```
+
