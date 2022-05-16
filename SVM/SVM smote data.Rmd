@@ -90,6 +90,9 @@ all.metrics
 
 ```{r}
 saveRDS(all.metrics, file = "output/metrics_smote_data.rds")
+
+#readRDS(file = "output/metrics_smote_data.rds")
+
 ```
 
 
@@ -139,6 +142,11 @@ print(Sys.time()-start_time)
 #saveRDS(classifier, file = "output/model_smote_data.rds")
 
 ```
+```{r}
+classifier<- readRDS(file = "output/model_smote_data.rds")
+```
+
+
 
 ```{r}
 # Predict test data
@@ -150,8 +158,22 @@ print(Sys.time()-start_time)
 #Evaluate prediction 
 cm_test_smote <- confusionMatrix(pred_svm_test_train_smote_oversampled_sub, df_test$readmitted)
 cm_test_smote
-```
-```{r}
-saveRDS(cm_test_smote, file = "output/cm_test_smote.rds")
+
 
 ```
+
+```{r}
+saveRDS(cm_test_smote, file = "output/cm_test_smote.rds")
+saveRDS(pred_svm_test_train_smote_oversampled_sub, file = "output/preds_test_smote.rds")
+saveRDS(df_test$readmitted, file = "output/obs_test_smote.rds")
+```
+
+```{r}
+set = df_test
+X1 <- seq(min(set[,1]) -1, max(set[,1]) +1, by=0.01)
+X2 <- seq(min(set[,2]) -1, max(set[,2]) +1, by=0.01)
+
+grid_set <- expand.grid(X1,X2)
+colnames(grid_set)
+```
+
