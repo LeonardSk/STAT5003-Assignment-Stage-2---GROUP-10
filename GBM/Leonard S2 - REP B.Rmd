@@ -238,12 +238,19 @@ Test_AvE %>%
          , NO = probs$.pred_NO) %>% 
   roc_curve(obs, `<30`:NO) %>%
   autoplot()
+
+Test_AvE %>% 
+  mutate_if(is.character, as.factor) %>% 
+  mutate(`<30` = probs$`.pred_<30`
+         , `>30` = probs$`.pred_>30`
+         , NO = probs$.pred_NO) %>% 
+  roc_auc(obs, `<30`:NO) 
 ```
 
 # VIP
 
 ```{r}
-vip(xgb.model.fit %>% extract_fit_parsnip())
+vi(xgb.model.fit %>% extract_fit_parsnip()) %>% write_csv("/Users/leonardseok/Documents/University of Sydney/Computational Statistics STAT5003/Assignment/Stage 2/ROC & variable importance/xgb_varimp.csv")
 ```
 
 
