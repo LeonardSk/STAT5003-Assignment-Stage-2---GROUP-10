@@ -131,10 +131,14 @@ knitr::include_graphics("Images/Random forest methodology.png")
 
 ---
 
-## Slide 12
+## Random Forest Results
 
-Model 2 - Random Forest
-Results
+<!--  ) -->
+
+```{r, out.width = "950px", echo=FALSE, fig.align="center"}
+
+```
+
 
 ---
 
