@@ -113,8 +113,8 @@ knitr::include_graphics("Images/knn_method.png")
 
 ## *k*-nearest neighbours results
 
-<!-- Looking at this heatmap visualisation of the confusion matrix, we find that the kNN model fails to predict any instances of the ‘<30’ class in the test set.  -->
-<!-- Second, the model fails to be sensitive to readmissions, which is critical to the goal of our project. -->
+<!-- Looking at this heatmap visualisation of the confusion matrix, we find that the kNN finds it difficult to predict the ‘<30’ and '>30' classes in the test set.  -->
+<!-- This means the model is not sensitive to readmissions, which is critical to the goal of our project. -->
 
 ```{r, out.width = "1200px", echo=FALSE, fig.align="center"}
 knitr::include_graphics("Images/CM_plot_table.png")
