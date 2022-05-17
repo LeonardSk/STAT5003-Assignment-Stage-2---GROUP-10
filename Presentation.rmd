@@ -133,7 +133,7 @@ knitr::include_graphics("Images/Random forest methodology.png")
 
 ## Random Forest Results
 
-<!--  ) -->
+<!-- We fit the model with best hyper-parameters, and found the sensitivity of each class is around 40%. Random forest is a powerful classifier, however, it may generate bias when there are categorical variables with multiple levels. And there are 14 such kind of variables in the current data. -->
 
 ```{r, out.width = "950px", echo=FALSE, fig.align="center"}
 
