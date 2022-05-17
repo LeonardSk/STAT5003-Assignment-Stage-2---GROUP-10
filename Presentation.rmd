@@ -133,7 +133,7 @@ knitr::include_graphics("Images/Random forest methodology.png")
 
 ## Random Forest Results
 
-<!--  ) -->
+<!-- We fit the model with best hyper-parameters, and found the sensitivity of each class is around 40%. Random forest is a powerful classifier, however, it may generate bias when there are categorical variables with multiple levels. And there are 14 such kind of variables in the current data. -->
 
 ```{r, out.width = "950px", echo=FALSE, fig.align="center"}
 
@@ -144,8 +144,10 @@ knitr::include_graphics("Images/Random forest methodology.png")
 
 ## Slide 13
 
-Model 3 - SVM
-Methodology
+```{r, out.width = "950px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/SVM methodology.png")
+```
+
 <!-- In SVM, we also experimented with different datasets and different features. 
 We used Raw data, downsampled and Oversampled data that using SMOTE. 
 We also tried training on full features and selected only features.
@@ -158,10 +160,13 @@ These experiments used hyperparameters as follows
 
 ## Slide 14
 
-Model 3 - SVM
-Results
+```{r, out.width = "950px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/SVM best result.png")
+```
+
 <!-- We fit the model with best hyperparameters, and got the average performance on 5-Fold is around 52%,
-Better than the other experiments which only got around 45%
+Better than the other experiments which only got around 45%. 
+On the test set, we got 45% average in terms of specificity and 72% in terms of specificity. And all of them are balance for three classes
 -->
 
 ---
