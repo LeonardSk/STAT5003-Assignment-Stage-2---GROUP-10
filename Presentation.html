@@ -29,35 +29,18 @@ class: center, middle, inverse, title-slide
 
 ## Problem
 
-&lt;!-- The prevalence of diabetes is growing rapidly all over the world. --&gt;
-
-&lt;!-- Hospitalized diabetes patients have a higher risk of hospital readmission after discharge from hospital. --&gt;
-
-&lt;!-- This generates significant burden to the patients and the health care system. --&gt;
-
-&lt;!-- Identifying this group of patients will improve the management of the high readmission rate. --&gt;
-
-
 &lt;img src="Images/Problem.png" width="1000px" style="display: block; margin: auto;" /&gt;
-
 
 ---
 
 
 ## Introduction of the dataset
 
-&lt;!-- Speech (to delete): Our dataset represents 10 years of hospital admission cases for patients diagnosed with diabetes. There're 55 categorical and numerical features that cover a variety of demographical and clinical data. Our goal is to build a multi classifier that predict chance of patient readmission.
---&gt;
-
 &lt;img src="Images/dataset_intro.png" width="900px" style="display: block; margin: auto;" /&gt;
 
 ---
 
 ## Challenge of data
-
-&lt;!-- Key challenges for the analysis include: big sample size which increases execution time and computational cost; messy data that requires proper cleaning in order to filter outliers, remove duplications and handle missing data; building a multi-class classifier; rebalancing imbalanced classes; and processing high level categorical variables in the data.
-
---&gt;
 
 &lt;img src="Images/challenges_2.png" width="900px" style="display: block; margin: auto;" /&gt;
 
@@ -71,9 +54,9 @@ class: center, middle, inverse, title-slide
 ---
 
 
-## Slide 5
+## Data Cleaning 
 
-IDA - data cleaning - Leonard
+&lt;img src="Images/Data cleaning slide - Leo.png" width="900px" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -99,25 +82,17 @@ IDA - data cleaning - Leonard
 
 ## *k*-nearest neighbours tuning
 
-&lt;!-- Speech (to delete): We first consider the k Nearest Neighbours method. --&gt;
-&lt;!-- To tune the hyperparameter k for best accuracy while minimizing computational time, we adopt the heuristic that the best k is approximately equal to root N where N is the number of points. --&gt;
-&lt;!-- By iterating around this value, we obtain our best k estimate. --&gt;
-
 &lt;img src="Images/knn_method.png" width="900px" style="display: block; margin: auto;" /&gt;
 
 ---
 
 ## *k*-nearest neighbours results
 
-&lt;!-- Looking at this heatmap visualisation of the confusion matrix, we find that the kNN finds it difficult to predict the ‘&lt;30’ and '&gt;30' classes in the test set.  --&gt;
-&lt;!-- This means the model is not sensitive to readmissions, which is critical to the goal of our project. --&gt;
-
 &lt;img src="Images/CM_plot_table.png" width="1200px" style="display: block; margin: auto;" /&gt;
 
 ---
 
 ## Random Forest Methodology
-&lt;!-- Then we built a random forest model, we firstly tried different dataset to balance the class, and found only down sample data was able to pick up the minority class group. Then we tried different functions and features, and performed hyper-parameter tuning. (with or without: The red highlights indicate tests with best performance.) --&gt;
 
 &lt;img src="Images/Random forest methodology.png" width="950px" style="display: block; margin: auto;" /&gt;
 
@@ -125,42 +100,24 @@ IDA - data cleaning - Leonard
 
 ## Random Forest Results
 
-&lt;!-- We fit the model with best hyper-parameters, and found the sensitivity of each class is around 40%. Random forest is a powerful classifier, however, it may generate bias when there are categorical variables with multiple levels. And there are 14 such kind of variables in the current data. --&gt;
-
-
+&lt;img src="Images/Random forest results.png" width="950px" style="display: block; margin: auto;" /&gt;
 
 
 ---
 
-## Slide 13
+## SVM Methodology
 
 &lt;img src="Images/SVM methodology.png" width="950px" style="display: block; margin: auto;" /&gt;
 
-&lt;!-- In SVM, we also experimented with different datasets and different features. 
-We used Raw data, downsampled and Oversampled data that using SMOTE. 
-We also tried training on full features and selected only features.
-From those experiments, we found that by using SMOTE data, with all features, it yielded the best performance with test data. 
-
-These experiments used hyperparameters as follows 
---&gt;
-
 ---
 
-## Slide 14
+## SVM Best Result
 
 &lt;img src="Images/SVM best result.png" width="950px" style="display: block; margin: auto;" /&gt;
-
-&lt;!-- We fit the model with best hyperparameters, and got the average performance on 5-Fold is around 52%,
-Better than the other experiments which only got around 45%. 
-On the test set, we got 45% average in terms of specificity and 72% in terms of specificity. And all of them are balance for three classes
---&gt;
 
 ---
 
 ## Multinomial Logistic Regression 
-
-&lt;!-- We then fit multinomial logistic regression and applied different combination of class balancing and feature selection technique. Model based on raw data and all features gives the best accuracy of 54%, however like KNN model, sensitivity and specificity is highly skewed, with no instances predicted to be in the minor class (&lt;30 days). 
---&gt;
 
 &lt;img src="Images/logistic_regression_1.png" width="900px" style="display: block; margin: auto;" /&gt;
 
@@ -168,38 +125,29 @@ On the test set, we got 45% average in terms of specificity and 72% in terms of 
 
 ## Multinomial Logistic Regression (cont.) 
 
-&lt;!-- the downsampled model predicts better for readmission class but lowers the overall accuracy to 43%.
---&gt;
-
-
+&lt;img src="Images/logistic_regression_2.png" width="900px" style="display: block; margin: auto;" /&gt;
 
 ---
 
-## Slide 17
+## GBM Methodology
 
-Model 5 - Decision Tree/GBM
-Methodology
-
----
-
-## Slide 18
-
-Model 5 - Decision Tree/GBM
-Results
+&lt;img src="Images/GBM slide Leo.png" width="900px" style="display: block; margin: auto;" /&gt;
 
 ---
 
-## Slide 19
+## GBM Results
 
-Conclusion - which model performs the best - Leonard
+&lt;img src="Images/GBM_Results_updated.png" width="980px" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Model Comparison
+
+&lt;img src="Images/Model Comparison.png" width="980px" style="display: block; margin: auto;" /&gt;
 
 ---
 
 ## Future improvement
-
-&lt;!-- There are several ways we can improve the performance of the model. Firstly, combine the two classes, patients readmitted within 30 days and  after 30 days, which have similar clinical meanings.
-We can also increase observation number, reduce categorical variable levels, adjust threshold for existing models, and try other classification algorithms.--&gt;
-
 
 &lt;img src="Images/Future improvement.png" width="900px" style="display: block; margin: auto;" /&gt;
 
