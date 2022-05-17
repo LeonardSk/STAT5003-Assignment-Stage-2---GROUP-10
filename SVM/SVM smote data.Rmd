@@ -31,7 +31,23 @@ library(dplyr)
 ```{r}
 diabetic.data <- read.csv('../data/train_SMOTE_oversampled.csv', header=TRUE)
 head(diabetic.data)
-#dim(diabetic.data)
+dim(diabetic.data)
+table(diabetic.data['readmitted'])
+```
+
+```{r}
+diabetic.no <- subset(diabetic.data, readmitted == "NO")
+diabetic.no <- diabetic.no[1:20000,]
+
+diabetic.less30 <- subset(diabetic.data, readmitted == "<30")
+diabetic.less30 <-diabetic.less30[1:20000,]
+
+diabetic.more30 <- subset(diabetic.data, readmitted == ">30")
+diabetic.more30 <- diabetic.more30[1:20000,]
+
+diabetic.data <- rbind(diabetic.no, diabetic.less30, diabetic.more30)
+dim(diabetic.data)
+diabetic.data <- rbind(diabetic.data,df_test)
 
 ```
 
@@ -127,7 +143,9 @@ class3$readmitted <- ">30"
 df_test <- rbind(class1, class2, class3)
 df_test$readmitted <- factor(df_test$readmitted)
 head(df_test)
+
 ```
+
 
 
 
@@ -143,7 +161,10 @@ print(Sys.time()-start_time)
 
 ```
 ```{r}
-classifier<- readRDS(file = "output/model_smote_data.rds")
+saveRDS(classifier, file = "output/20220517-model_smote_data.rds")
+
+#classifier<- readRDS(file = "output/20220517-model_smote_data.rds")
+#classifier
 ```
 
 
@@ -163,17 +184,11 @@ cm_test_smote
 ```
 
 ```{r}
+cm<- readRDS(file = "output/cm_test_smote_data.rds")
 saveRDS(cm_test_smote, file = "output/cm_test_smote.rds")
 saveRDS(pred_svm_test_train_smote_oversampled_sub, file = "output/preds_test_smote.rds")
 saveRDS(df_test$readmitted, file = "output/obs_test_smote.rds")
 ```
 
-```{r}
-set = df_test
-X1 <- seq(min(set[,1]) -1, max(set[,1]) +1, by=0.01)
-X2 <- seq(min(set[,2]) -1, max(set[,2]) +1, by=0.01)
 
-grid_set <- expand.grid(X1,X2)
-colnames(grid_set)
-```
 
