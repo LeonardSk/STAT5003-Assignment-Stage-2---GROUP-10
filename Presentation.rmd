@@ -113,8 +113,8 @@ knitr::include_graphics("Images/knn_method.png")
 
 ## *k*-nearest neighbours results
 
-<!-- Looking at this heatmap visualisation of the confusion matrix, we find that the kNN model fails to predict any instances of the ‘<30’ class in the test set.  -->
-<!-- Second, the model fails to be sensitive to readmissions, which is critical to the goal of our project. -->
+<!-- Looking at this heatmap visualisation of the confusion matrix, we find that the kNN finds it difficult to predict the ‘<30’ and '>30' classes in the test set.  -->
+<!-- This means the model is not sensitive to readmissions, which is critical to the goal of our project. -->
 
 ```{r, out.width = "1200px", echo=FALSE, fig.align="center"}
 knitr::include_graphics("Images/CM_plot_table.png")
@@ -131,17 +131,23 @@ knitr::include_graphics("Images/Random forest methodology.png")
 
 ---
 
-## Slide 12
+## Random Forest Results
 
-Model 2 - Random Forest
-Results
+<!-- We fit the model with best hyper-parameters, and found the sensitivity of each class is around 40%. Random forest is a powerful classifier, however, it may generate bias when there are categorical variables with multiple levels. And there are 14 such kind of variables in the current data. -->
+
+```{r, out.width = "950px", echo=FALSE, fig.align="center"}
+
+```
+
 
 ---
 
-## Slide 13
+## SVM Methodology
 
-Model 3 - SVM
-Methodology
+```{r, out.width = "950px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/SVM methodology.png")
+```
+
 <!-- In SVM, we also experimented with different datasets and different features. 
 We used Raw data, downsampled and Oversampled data that using SMOTE. 
 We also tried training on full features and selected only features.
@@ -152,12 +158,15 @@ These experiments used hyperparameters as follows
 
 ---
 
-## Slide 14
+## SVM Best Result
 
-Model 3 - SVM
-Results
+```{r, out.width = "950px", echo=FALSE, fig.align="center"}
+knitr::include_graphics("Images/SVM best result.png")
+```
+
 <!-- We fit the model with best hyperparameters, and got the average performance on 5-Fold is around 52%,
-Better than the other experiments which only got around 45%
+Better than the other experiments which only got around 45%. 
+On the test set, we got 45% average in terms of specificity and 72% in terms of specificity. And all of them are balance for three classes
 -->
 
 ---
@@ -179,7 +188,7 @@ knitr::include_graphics("Images/logistic_regression_1.png")
 -->
 
 ```{r, out.width = "900px", echo=FALSE, fig.align="center"}
-knitr::include_graphics("Images/logistic_regression_2.png")
+#knitr::include_graphics("Images/logistic_regression_2.png")
 ```
 
 ---

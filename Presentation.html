@@ -4,7 +4,7 @@
     <title>Group 10 Presentation</title>
     <meta charset="utf-8" />
     <meta name="author" content="Group 10" />
-    <script src="Presentation_files/header-attrs-2.14/header-attrs.js"></script>
+    <script src="Presentation_files/header-attrs-2.11/header-attrs.js"></script>
     <link href="Presentation_files/remark-css-0.0.1/default.css" rel="stylesheet" />
     <link href="Presentation_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
   </head>
@@ -46,7 +46,7 @@ class: center, middle, inverse, title-slide
 
 ## Introduction of the dataset
 
-&lt;!-- Speech (to delete): The dataset we chose for the study represents 10 years of hospital admission cases for patients diagnosed with diabetes. There’re 55 categorical and numerical features that cover a variety of demographical and clinical data. Our goal is to build a model that discriminate patients readmitted within 30 days of discharge against patients readmitted after 30 days or never come back.
+&lt;!-- Speech (to delete): Our dataset represents 10 years of hospital admission cases for patients diagnosed with diabetes. There're 55 categorical and numerical features that cover a variety of demographical and clinical data. Our goal is to build a multi classifier that predict chance of patient readmission.
 --&gt;
 
 &lt;img src="Images/dataset_intro.png" width="900px" style="display: block; margin: auto;" /&gt;
@@ -55,7 +55,7 @@ class: center, middle, inverse, title-slide
 
 ## Challenge of data
 
-&lt;!-- Speech (to delete): The key challenges for the analysis include: 1) Big data – there’s over 100k observations in our data, which means longer execution time and higher computational cost; 2) data is messy and requires proper cleaning in order to filter outliers, remove duplications and handle missing data; 3) the problem we’re solving is to build a multi-class classifier, which is extension from building a binary model; 4) the classes are imbalanced, thus requires further balancing.
+&lt;!-- Key challenges for the analysis include: big sample size which increases execution time and computational cost; messy data that requires proper cleaning in order to filter outliers, remove duplications and handle missing data; building a multi-class classifier; rebalancing imbalanced classes; and processing high level categorical variables in the data.
 
 --&gt;
 
@@ -109,8 +109,8 @@ IDA - data cleaning - Leonard
 
 ## *k*-nearest neighbours results
 
-&lt;!-- Looking at this heatmap visualisation of the confusion matrix, we find that the kNN model fails to predict any instances of the ‘&lt;30’ class in the test set.  --&gt;
-&lt;!-- Second, the model fails to be sensitive to readmissions, which is critical to the goal of our project. --&gt;
+&lt;!-- Looking at this heatmap visualisation of the confusion matrix, we find that the kNN finds it difficult to predict the ‘&lt;30’ and '&gt;30' classes in the test set.  --&gt;
+&lt;!-- This means the model is not sensitive to readmissions, which is critical to the goal of our project. --&gt;
 
 &lt;img src="Images/CM_plot_table.png" width="1200px" style="display: block; margin: auto;" /&gt;
 
@@ -123,40 +123,55 @@ IDA - data cleaning - Leonard
 
 ---
 
-## Slide 12
+## Random Forest Results
 
-Model 2 - Random Forest
-Results
+&lt;!-- We fit the model with best hyper-parameters, and found the sensitivity of each class is around 40%. Random forest is a powerful classifier, however, it may generate bias when there are categorical variables with multiple levels. And there are 14 such kind of variables in the current data. --&gt;
+
+
+
 
 ---
 
 ## Slide 13
 
-Model 3 - SVM
-Methodology
+&lt;img src="Images/SVM methodology.png" width="950px" style="display: block; margin: auto;" /&gt;
+
+&lt;!-- In SVM, we also experimented with different datasets and different features. 
+We used Raw data, downsampled and Oversampled data that using SMOTE. 
+We also tried training on full features and selected only features.
+From those experiments, we found that by using SMOTE data, with all features, it yielded the best performance with test data. 
+
+These experiments used hyperparameters as follows 
+--&gt;
 
 ---
 
 ## Slide 14
 
-Model 3 - SVM
-Results
+&lt;img src="Images/SVM best result.png" width="950px" style="display: block; margin: auto;" /&gt;
+
+&lt;!-- We fit the model with best hyperparameters, and got the average performance on 5-Fold is around 52%,
+Better than the other experiments which only got around 45%. 
+On the test set, we got 45% average in terms of specificity and 72% in terms of specificity. And all of them are balance for three classes
+--&gt;
 
 ---
 
-## Logistic Regression Methodology
+## Multinomial Logistic Regression 
 
-&lt;!-- Speech (to delete): We then fit multinomial logistic regression, which uses maximum likelihood estimation to evaluate the probability of class membership. We applied different combination of up/down sampling and feature selection technique. Model based on raw data and all features gives the best accuracy of around 54%, however like KNN model, sensitivity and specificity for the prediction is highly skewed, with no instances predicted to be in &lt;30 days class. 
+&lt;!-- We then fit multinomial logistic regression and applied different combination of class balancing and feature selection technique. Model based on raw data and all features gives the best accuracy of 54%, however like KNN model, sensitivity and specificity is highly skewed, with no instances predicted to be in the minor class (&lt;30 days). 
 --&gt;
 
 &lt;img src="Images/logistic_regression_1.png" width="900px" style="display: block; margin: auto;" /&gt;
 
 ---
 
-## Slide 16
+## Multinomial Logistic Regression (cont.) 
 
-Model 4 - Logistic Regression
-Results
+&lt;!-- the downsampled model predicts better for readmission class but lowers the overall accuracy to 43%.
+--&gt;
+
+
 
 ---
 
