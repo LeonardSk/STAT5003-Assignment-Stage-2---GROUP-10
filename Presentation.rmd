@@ -184,7 +184,7 @@ knitr::include_graphics("Images/logistic_regression_1.png")
 
 ## Multinomial Logistic Regression (cont.) 
 
-<!-- Downsampling the data gives better prediction for the two minor classes that we're most interested in, but in the meanwhile lowers the overall accuracy to 43%. The computational time for running the model takes around 15 second.
+<!-- Downsampling the data gives better prediction for the two minor classes that we're most interested in, but in the meanwhile it lowers the overall accuracy to 43%, and risks removing useful information in the sample. Running the algorithm for downsampled data takes only 15 second and is computationally efficient.
 -->
 
 ```{r, out.width = "900px", echo=FALSE, fig.align="center"}
