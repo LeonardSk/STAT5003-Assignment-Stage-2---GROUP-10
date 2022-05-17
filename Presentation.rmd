@@ -188,7 +188,7 @@ knitr::include_graphics("Images/logistic_regression_1.png")
 -->
 
 ```{r, out.width = "900px", echo=FALSE, fig.align="center"}
-#knitr::include_graphics("Images/logistic_regression_2.png")
+knitr::include_graphics("Images/logistic_regression_2.png")
 ```
 
 ---
