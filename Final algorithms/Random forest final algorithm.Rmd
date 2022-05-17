@@ -158,7 +158,11 @@ toc()
 ## 4. RDS file
 
 ```{r}
-ranger_model_train_down %>% vip()
+# ranger_model_train_down %>% vi() %>% write_csv("/Users/leonardseok/Documents/University of Sydney/Computational Statistics STAT5003/Assignment/Stage 2/ROC & variable importance/RF_varimp.csv")
+
+varImp(ranger_model_train_down)
+ranger_model_train_down$variable.importance
+
 ```
 
 ```{r}
