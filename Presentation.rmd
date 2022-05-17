@@ -162,7 +162,7 @@ Better than the other experiments which only got around 45%
 
 ---
 
-## Logistic Regression Methodology
+## Multinomial Logistic Regression 
 
 <!-- We then fit multinomial logistic regression and applied different combination of class balancing and feature selection technique. Model based on raw data and all features gives the best accuracy of 54%, however like KNN model, sensitivity and specificity is highly skewed, with no instances predicted to be in the minor class (<30 days). 
 -->
@@ -173,7 +173,7 @@ knitr::include_graphics("Images/logistic_regression_1.png")
 
 ---
 
-## Logistic Regression Results
+## Multinomial Logistic Regression (cont.) 
 
 <!-- the downsampled model predicts better for readmission class but lowers the overall accuracy to 43%.
 -->
