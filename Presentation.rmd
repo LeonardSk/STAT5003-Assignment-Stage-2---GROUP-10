@@ -142,7 +142,7 @@ knitr::include_graphics("Images/Random forest methodology.png")
 
 ---
 
-## Slide 13
+## SVM Methodology
 
 ```{r, out.width = "950px", echo=FALSE, fig.align="center"}
 knitr::include_graphics("Images/SVM methodology.png")
@@ -158,7 +158,7 @@ These experiments used hyperparameters as follows
 
 ---
 
-## Slide 14
+## SVM Best Result
 
 ```{r, out.width = "950px", echo=FALSE, fig.align="center"}
 knitr::include_graphics("Images/SVM best result.png")
@@ -188,7 +188,7 @@ knitr::include_graphics("Images/logistic_regression_1.png")
 -->
 
 ```{r, out.width = "900px", echo=FALSE, fig.align="center"}
-knitr::include_graphics("Images/logistic_regression_2.png")
+#knitr::include_graphics("Images/logistic_regression_2.png")
 ```
 
 ---
