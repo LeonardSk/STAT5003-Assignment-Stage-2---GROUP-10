@@ -1,11 +1,12 @@
 ---
-title: "Group 10 STAT5003 Assignment Stage 2"
+title: "Group 10 STAT5003 Assignment Report"
 author: "Group 10"
 date: "`r Sys.Date()`"
-output: html_document
-editor_options: 
-  chunk_output_type: console
+geometry: margin=0.5in
+output:
+  html_document: default
 ---
+\vspace{-5truemm}
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
@@ -64,27 +65,33 @@ package_list <- c("broom"
 map(package_list, ~install.custom(.x))
 ```
 
-## Train/Test Split
-Import cleaned data and performed train/test split where 80% will go to train and 20% will go to test. 
+# Train/Test Split
+Cleaned data was imported and train/test split was performed where 80% will go to train and 20% will go to test. 
 
-```{r}
+```{r, echo = F}
 df = read.csv('diabetic_data_clean_S1.csv', header = TRUE)
 df  <- select(df, -1) #remove row number
 df <- df %>% select(-c('encounter_id', 'patient_nbr'))
 ```
 
-```{r}
+```{r, echo = F}
 inTrain <- createDataPartition(df$readmitted, p = .8)[[1]]
 train <- df[ inTrain, ]
 test  <- df[-inTrain, ]
 ```
 
-## Oversampling by replicating instances from minority class
+# Treating Imbalanced Class
 
-As identified in previous sections, one of the issues about the dataset is imbalanced class. ">30" and "<30" were undersampled. If the class is imbalanced, it is highly likely that the predicted class would be dominated by the majority class, which leads to a biased model result.
-Therefore, Oversampling was performed in two approaches. The first one we chose to replicate the instances from the minority classes generated a new class distribution of 4:3:3. Likely this will lead to overfitting where training accuracy maybe high but the model is not good at predicting for unseen data. 
+One of the issues about the dataset is imbalanced class. From the bar plot below it can be observed that the class variable is dominated by the 'NO' level. If this issue is not treated properly, the trained classifier will tend to be more biased towards the major class and potentially not making any predictions on the minor classes. 
 
-```{r}
+Therefore, to treat the imbalanced class issue, several techniques were perform as follows:
+1. Oversampling by replicating instances from minor classes
+2. Oversampling by SMOTE 
+3. Downsampling
+
+With oversampling by replicating instances from minor classes, we first subset for the two minor classes: <30 and >30. Then we replicated instances 5 times and 2 times respectively for each class, in order to make the dataset more balanced. In this way, we didn't introduce any artificial instances but this is likely to result in overfitting where training accuracy maybe high but the model is not good at predicting for unseen data. 
+
+```{r, echo = F}
 #oversampling - replicating minority classes
 train.class1.raw <- subset(train, train$readmitted == '<30') # <30
 train.class2.raw <- subset(train,train$readmitted == 'NO') 
@@ -101,23 +108,19 @@ train.class3.raw.rep <- train.class3.raw[rep(class3.rows,class3.times),]
 
 df_oversampled_rep <- rbind(train.class1.raw.rep, train.class2.raw, train.class3.raw.rep)
 
-table(df_oversampled_rep$readmitted)
+#table(df_oversampled_rep$readmitted)
 ```
 
-## Oversampling by SMOTE
+We also explored the option of SMOTE to oversample the minor classes. Instead of duplicating instances from the minority class that may lead to overfitting, SMOTE synthesizes new instances of the minority class between a random instance of the minority class and one of its k nearest neighbor (here K = 3). Given that most features in the data were categorical, one hot encoding was first performed. Since SMOTE generates new instances by calculating the distance between the random data point of the minority class and a random point of its neighbour, the raw results of new instances from SMOTE will generate decimals between 0 and 1. This adds no meaingful value to the data, therefore, an ifelse rule was created to round >0.5 to 1 and <0.5 to 0. Checks were also performed to ensure for each predictor, only one level will be 1 and the rest of the levels are 0. For new numerical instances, we also rounded the values to integer, aligning with the original data format. 
 
-Therefore, another technique called SMOTE was performed to oversample the minority classes. Instead of duplicating instances from the minority class that may lead to overfitting, SMOTE synthesizes new instances of the minority class between a random instance of the minority class and one of its k nearest neighbor (here K = 3). Given that most features in the data were categorical, one hot encoding was first performed. Since SMOTE generates new instances by calculating the distance between the random data point of the minority class and a random point of its neighbour, the raw results from SMOTE will contain decimals between 0 and 1. This adds no meaingful value to the data, therefore, an ifelse rule was created to round >0.5 to 1 and <0.5 to 0. 
-After applying SMOTE, the class distribution of the new data is approximately 4:3:3, which yields a more balanced dataset. 
-
-```{r}
+```{r, echo = F}
 #one hot encoding
-#training 
-library(caret)
+#library(caret)
 dummy <- dummyVars(" ~ .", data=train)
 oh.df.train <- data.frame(predict(dummy, newdata = train))
 ```
 
-```{r}
+```{r, echo = F}
 #training oversampling - SMOTE
 train.class1 <- subset(oh.df.train, oh.df.train$readmitted.30 == 1) #<30
 train.class2 <- subset(oh.df.train, oh.df.train$readmittedNO == 1)
@@ -134,7 +137,7 @@ new.train.class.1 <- new.train.class.1[,-ncol(new.train.class.1)]
 new.train.class.3 <- new.train.class.3[,-ncol(new.train.class.3)]
 ```
 
-```{r}
+```{r, echo = F}
 df_smote_train <- rbind(new.train.class.1, train.class2, new.train.class.3 )
 
 #getting label back
@@ -160,11 +163,11 @@ df_smote_train_FINAL <- rbind(class1, class2, class3)
 ```
 
 
-```{r}
+```{r, echo = F}
 #rounding for new instances
 #colnames(df_smote_train_FINAL)
 
-#for categorical factors that dont need rounding
+#for categorical factors that don't need rounding
 for (i in c(1:15, 20:46, 48:87)){
   df_smote_train_FINAL[,i] <- ifelse(df_smote_train_FINAL[,i] >0.5,1,0)
 }
@@ -176,31 +179,80 @@ for (i in c(16:19, 47)){
 ```
 
 
-```{r}
+```{r, echo = F}
 #doing checks to see if the rounding works
-#sum(rowSums(df_smote_train_FINAL[,88:90]))
+#sum(rowSums(df_smote_train_FINAL[,88:90])) #this sum should equal to the number of rows
 #check <- df_smote_train_FINAL[rowSums(df_smote_train_FINAL[,1:3]) != 1,]
 ```
 
+After oversampling techniques, the class distribution of the new data is approximately 4:3:3, which yields a more balanced dataset. 
+We also explored the option of downsampling, we first converted categorical predictors to factors as a preliminary feature engineering step for future model training, then we applied the downSample function to downsample the major classes 'NO' and '>30' class so that 3 classes are now balanced. However, although we didn't introduce new or artificial instances, we may potentially lose some useful information.
 
-```{r}
-par(mfrow = c(1,2))
-barplot(prop.table(table(df$readmitted
+```{r, echo = F}
+#DOWNSAMPLING
+# Convert character to factor in train data
+train$race <- factor(train$race)
+train$gender <- factor(train$gender)
+train$age <- factor(train$age, order = TRUE, levels = c("[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"))
+train$diag_1 <- factor(train$diag_1 )
+train$diag_2 <- factor(train$diag_2)
+train$diag_3 <- factor(train$diag_3)
+train$A1Cresult <- factor(train$A1Cresult)
+train$metformin <- factor(train$metformin)
+train$glipizide <- factor(train$glipizide)
+train$glyburide <- factor(train$glyburide)
+train$pioglitazone <- factor(train$pioglitazone)
+train$rosiglitazone <- factor(train$rosiglitazone)
+train$insulin  <- factor(train$insulin )
+train$change <- factor(train$change)
+train$diabetesMed <- factor(train$diabetesMed)
+train$readmitted <- factor(train$readmitted, order = TRUE, levels = c("NO", ">30", "<30"))
+train$admission_source <- factor(train$admission_source)
+train$discharge_disposition <- factor(train$discharge_disposition)
+train$admission_type <- factor(train$admission_type)
+```
+
+```{r, echo = F}
+#Downsampling
+train_down <- downSample(subset(train, select = -c(readmitted)), train[["readmitted"]], list = FALSE)
+
+names(train_down)[names(train_down) == "Class"] <- "readmitted"
+
+#table(train_down$readmitted)
+```
+
+```{r, echo = F, fig.width=8, fig.height=2.5}
+#producing graphs for 3 re-sampling techniques
+par(mfrow = c(1,4))
+
+barplot(prop.table(table(train$readmitted
 )),
   xlab = "Class",
-  main = "Training data Class Distribution before Oversampling", cex.main = 0.5, 
-  cex.axis = 0.9, cex.lab = 0.7)
-#checking class distribution after oversampling
+  main = "Original Class Distribution", cex.main = 0.8, 
+  cex.axis = 0.6, cex.lab = 0.8)
+
+barplot(prop.table(table(df_oversampled_rep$readmitted
+)),
+  xlab = "Class",
+  main = "Oversampling by replication", cex.main = 0.8, 
+  cex.axis = 0.6, cex.lab = 0.8)
+
 barplot(prop.table(table(df_smote_train_FINAL$readmitted
 )),
   xlab = "Class",
-  main = "Training data Class Distribution after Oversampling", cex.main = 0.5, 
-  cex.axis = 0.9, cex.lab = 0.7)
+  main = "Oversampling by SMOTE", cex.main = 0.8, 
+  cex.axis = 0.6, cex.lab = 0.8)
+
+barplot(prop.table(table(train_down$readmitted
+)),
+  xlab = "Class",
+  main = "Downsampling", cex.main = 0.8, 
+  cex.axis = 0.6, cex.lab = 0.8)
+
 ```
 
-## Exporting to CSV
 
-```{r}
+```{r, echo = F}
 #export to csv
 #testing
 #write.csv(test,"test_raw.csv", row.names = FALSE)
@@ -209,26 +261,27 @@ barplot(prop.table(table(df_smote_train_FINAL$readmitted
 #write.csv(train,"train_raw.csv", row.names = FALSE)
 #write.csv(df_oversampled_rep,"train_rep_oversampled.csv", row.names = FALSE)
 #write.csv(df_smote_train_FINAL,"train_SMOTE_oversampled.csv", row.names = FALSE)
+#write.csv(train_down,"train_down.csv", row.names = FALSE)
 ```
 
-## Feature Selection
+# Feature Engineering
 
-Features were first being separated into numerical and categorical. For categorical features, label encoding was performed as a pre-processing step. Label encoding was chosen over one hot encoding because the dataset is large with 19 categorical features and converting all 19 features into one hot encoding will significantly increase the computational time. Performing one hot encoding after feature selection with reduced features will be more appropriate. 
-
-Lasso feature selection technique was performed. 
-The goal of lasso regression is to obtain the subset of predictors that minimizes prediction error by adding a regularization term to the cost function so coefficients for some variables are shrunk towards zero and being completely ignored. This yields a simpler model with less features. 
+After performing train/test split and re-sampling, feature selection was performed to identify the potential subset of important features. Mutinomial Lasso regression was chosen as the feature selection algorithm as we aim to generate a simpler model with less features. Unlike Ridge regression that puts less weight on less important features, Lasso regression obtain the subset of predictors that minimizes prediction error by adding a regularization term to the cost function so coefficients for some variables are shrunk towards zero and being completely ignored.
 
 A grid was generated to identify the best lambda in Lasso as we aim to find the balance between simplicity and model fit that minimizes the mse in cross validation. A 10-fold cross-validation for Lasso was performed with standardization to address the issue that variables are sharing different units. In the result, the best lambda that minimizes the cross-validation error was 0.0006. 
 
-```{r}
-### ------------------- Lasso Regression 
+```{r , echo = F, fig.show="hide"}
+# train/test split
+inTrain <- createDataPartition(df$readmitted, p = .8)[[1]]
+train <- df[ inTrain, ]
+test  <- df[-inTrain, ]
 
 # Selecting the Numerical Columns
-num_cols <- unlist(lapply(df, is.numeric))
+num_cols <- unlist(lapply(train, is.numeric))
 num_cols <- names(num_cols[which(num_cols)])
 
 # Selecting Categorical Columns
-cat_cols <- unlist(lapply(df, is.character))
+cat_cols <- unlist(lapply(train, is.character))
 cat_cols <- names(cat_cols[which(cat_cols)])
 
 
@@ -239,17 +292,16 @@ encode_ordinal <- function(x, order = unique(x)) {
 }
 
 for (i in 1:length(cat_cols)){
-  df[[cat_cols[i]]] <- encode_ordinal(df[[cat_cols[i]]])
+  train[[cat_cols[i]]] <- encode_ordinal(train[[cat_cols[i]]])
 }
 
 
-df_x <- df %>% select(-c('readmitted'))
-df_y <- df %>% select(c('readmitted'))
+df_x <- train %>% select(-c('readmitted'))
+df_y <- train %>% select(c('readmitted'))
 
 x <- as.matrix(df_x)
 y <- as.double(as.matrix(df_y))
 
-set.seed(123)
 #set alpha = 1 for Lasso
 #multinomial for multi class classification
 grid <- 10^seq(8,-2, length=100)
@@ -259,20 +311,19 @@ cv.out <- cv.glmnet(x, y, family = 'multinomial', alpha=1, standardize = TRUE, t
 plot(cv.out)
 ```
 
-```{r}
+```{r, echo = F}
 #choosing best lambda
 bestlam <- cv.out$lambda.min
-bestlam
+#bestlam
 ```
 
-Finally a subset of features were selected by Lasso. From the list below it can be observed that the subsettd features mostly overlap with the ones that were identified in the GLM variable ranking.
-However, different algorithms may generate different variable importance, therefore the subset of important features here identified by Lasso is serving as a starting point only. 
+A subset of features were selected by Lasso. Lasso shrinks the model down from 23 predictors to 12 predictors and identifying race, gender, age, diag_3, number_diagnoses, admissiong_source, discharge_disposition, admission_type and some other medications as important features. However, one of the pitfalls of Lasso regression is that it does not provide much interpretability on why such features were selected, hence trial and error was conducted in later modelling stage to test if using Lasso selected features only will yield a better model against using all features.
 
-```{r}
+```{r, echo = F}
 # subset of features
 coef_names_lasso <- coef(cv.out, s = 0)[[1]]
 selected_variables <- row.names(coef_names_lasso)[coef_names_lasso@i+1]
-
-selected_variables
+#selected_variables
 ```
+
 
