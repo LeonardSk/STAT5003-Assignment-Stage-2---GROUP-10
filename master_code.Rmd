@@ -163,11 +163,15 @@ A grid was generated to identify the best lambda in Lasso as we aim to find the 
 A subset of features were selected by Lasso. Lasso shrinks the model down from 23 predictors to 12 predictors and identifying race, gender, age, diag_3, number_diagnoses, admissiong_source, discharge_disposition, admission_type and some other medications as important features. However, one of the pitfalls of Lasso regression is that it does not provide much interpretability on why such features were selected, hence trial and error was conducted in later modelling stage to test if using Lasso selected features only will yield a better model against using all features.
 
 ## 8. Classification methods
-To find the best classification algorithm for the current data, we tried 5 different classification algorithms, including K-nearest neighbor, support vector machine, logistic regression, random forest and XGBoosting. The algorithm aims to identify the patients who will readmit to hospital within 30 days and after 30 days, therefore, We choose sensitivity as the metrics to evaluate the algorithms, and more specially, the sensitivity of the "<30 days" and ">30 days" class groups. Besides sensitivity, we also determined F1 score and ROC of each algorithm, which provide additional information on the performance of algorithms.The methods to choose the best algorithm is illustrated in Figure 1. Firstly, we trained each model with dataset either without balanced class (raw train dataset), or dataset with balanced class (SMOTE balanced dataset, repeat balanced dataset and downsample balanced dataset), to find the dataset with best sensitivity for the 2 classes. For random forest model, we also evaluated different functions, i.e. RandomForest, ranger and ordinal forest. Then hyper-parameter tuning was performed on each model using grid search cross validation (5 or 10 folds based on computational time of specific algorithms). 
-For K-nearest neighbors, we.........  
-For suport vector machine, We also run on different datasets and feature selection from Lasso to find the best combination. Hyper-parameter tuning using grid search 5-Fold cross validation is also employed to find the best combination of hyperparameter to result highest performance. From those experiments, we found that by using SMOTE data, with all features, it yielded the best performance with test data. 
+To find the best classification algorithm for the current data, we tried 5 different classification algorithms, including K-nearest neighbor, support vector machine, logistic regression, random forest and XGBoosting. The algorithm aims to identify the patients who will readmit to hospital within 30 days and after 30 days, therefore, We choose sensitivity as the metrics to evaluate the algorithms, and more specially, the sensitivity of the "<30 days" and ">30 days" class groups. Besides sensitivity, we also determined F1 score and ROC of each algorithm, which provide additional information on the performance of algorithms. The methods to choose the best algorithm is illustrated in Figure 1. Firstly, we trained each model on a data set either without balanced class (raw train dataset), or dataset with balanced class (SMOTE balanced dataset, repeat balanced dataset and downsample balanced dataset), to find the dataset with best sensitivity for the 2 classes. 
+For random forest model, we also evaluated different functions, i.e. RandomForest, ranger and ordinal forest. Then hyper-parameter tuning was performed on each model using grid search cross validation (5 or 10 folds based on computational time of specific algorithms). 
+For $k$-nearest neighbors, we computed the optimal $k$ from a grid of 20 values using 5 folds and the SMOTE balanced data set. This $k$ value was then used for the data set with additional repetitions to determine the optimal data set. 
+The suport vector machine method was run on the different data sets and feature selection from Lasso to find the best combination. Hyper-parameter tuning using grid search 5-Fold cross validation was also employed to find the best combination of hyperparameter to result highest performance. 
+From those experiments, we found that by using SMOTE data, with all features, it yielded the best performance with test data. 
 We then tried multinomial logistic regression, which predicts the probability of class membership. The set of parameters for the model are optimized through maximum likelihood estimation. We fit several models on different preprocessed data, raw data vs balanced data, full features vs Lasso selected features and find out the optimal model based on sensitivity, F1, ROC metrics. 
-For random forest, we searched the hyper-parameters num.trees in (1000, 2000, 4000, 6000, 8000, 10000, and mtry in (2,3,4,5,6) with 5 fold cross validation. For XGBoosting,.... The optimized algorithms for each model were generated using best hyper-parameters. The performance of different algorithms was compared based on sensitivity score and computational time. 
+For random forest, we searched the hyper-parameters num.trees in (1000, 2000, 4000, 6000, 8000, 10000, and mtry in (2,3,4,5,6) with 5 fold cross validation. 
+***For XGBoosting,.... (Leonard to complete)*** 
+We then compared the performance of these different algorithms with hyperparameters already tuned using the recall score and computational time. 
 
 ## 9. Results
 
@@ -231,20 +235,49 @@ All the experiments were using the best hyper-parameters as seen below:
 For logistic regression, raw data with all features gives the best accuracy of 54%, however, the sensitivity is highly skewed with no instances predicted to be in the class '<30 days'. This caused problem as the two classes that we're most interested in is patients who readmitted. Data with lasso selected features also posed the same problem.
 We then tried other class balancing approaches and downsampled dataset gives the best result, in the sense that it has highest sensitivity for class "<30 days" (36.2%) and ">30 days" (44.0%) compared to oversampled dataset. Its accuracy is lower 42.8% with more testing error, but overall predicts better for the minor classes and fits better for the purpose of our study. In addition, running the algorithm takes around 15 seconds and is more computationally efficient.
 
-
-
-### 9.5 XGBoosting 
+### 9.5 XGBoosting (Leonard to add)
 
 
 ### 9.6 Model comparision 
+We have used a diverse range of models to tackle this diabetes data set. 
+To compare these models, we refer back to our problem statement where we seek to optimise the model to have less negatives as a priority.
+Our key focus is the case where patients are readmitted to hospital within 30 days of discharge ("$<30$" class).
+Hence, we will define the "$<30$" class as 'positive' and the other two classes as 'negative' in our model comparison.
+In this case, a false negative will mean the hospital will not account for potential early readsmission, resulting in an adverse outcome for both hospital and patient. 
 
+```{r echo=FALSE, fig.cap="Model comparison using recall, precision and F1 metrics with positive class assigned to '<30'.", out.width = '60%', fig.align="center"}
+# knitr::include_graphics("xxx.png") Leonard to add photo from his slide
+```
+
+For our purpose, we use the recall score (TP/(TP + FN)) to evaluate and compare our models because of the importance of false negatives.
+Across our 5 models, we find the SVM algorithm trained on the data treated with SMOTE performs the best using this metric (smaller amount of false negatives).
+Using the F1 score, which is a more balanced score minimising both FP and FN, the SVM method is also favoured over the other models.
 
 
 ## 10. Discussion and conclusion
 
-In the current study, the classifier radial SVM was identified to be the best classifier. It can be used to identify the diabetes patients who have potential to be readmitted to hospital within 30 days and after 30 days of discharge, with a sensitivity of ..% and ..% respectively. SVM......discuss something like why it is good.... KNN......discussion......Logistic regression.....discussion...... We used 2 ensemble algorithms in this study, random forest and XGBoosting, however, their performance was not better than SVM. Random forest is generally a powerful algorithm, it can handle large data with multiple variables. However, random forest can be biased when categorical variables have multiple levels. In our dataset, 14 out of 23 variables are multilevel variables, which may prevent the accuracy of random forest algorithm.xGBoosting.......discussion....
+In the current study, the radial SVM algorithm was identified to be the best classifier. 
+It can be used to identify the diabetes patients who have potential to be readmitted to hospital within 30 days and after 30 days of discharge, with a sensitivity of ..% and ..% respectively. 
+In contrast, the $k$-NN method failed to be particularly sensitive to hospital readmission, especially for patients readmitted within 30 days of discharge.
+Our logistic regression algorithm has the advantage over other methods used such as $k$-NN by being far faster to run. 
+Ultimately however, the algorithm fails to predict the two classes of readmissions accurately 
+We used 2 ensemble algorithms in this study, random forest and XGBoosting, however, their performance was not better than SVM. 
+Random forest is generally a powerful algorithm, it can handle large data with multiple variables. 
+However, random forest can be biased when categorical variables have multiple levels. 
+In our dataset, 14 out of 23 variables are multilevel variables, which may prevent the accuracy of random forest algorithm.
+***xGBoosting.......discussion.... (Leonard to add)***
 
 There are a few ways to improve the classification. Firstly, the minority class "<30 days" and "> 30 days" can be combined, as the patients in these groups have similar clinical meanings, i.e. will be readmitted to hospital after discharge. This will change the multiclass classification problem into binary classification problem, and increase the observation number in the minority class, which will improve the performance of classifier. We can also increase the observation number of the minority classes, reduce categorical variable levels by recategorization, adjust the threshold to improve sensitivity in the current models. We can also try other classification algorithms, including 1) Linear discriminant analysis, which is capable with multiple class classification, or 2) Adaboosting, which algorithm can improve its performance by emphasizing the misclassified data, or 3) classification neural network, which can use a series of algorithms for classification problem, and is suitable for non-linear data, which our current data appears to be, although it may take longer computational time.
 
+\pagebreak
+## Contribution Statement
+All members of the group contributed equally to the project. More specifically, the following was completed by each member:
+
+* HL
+* JC
+* JS
+* LS
+* ML
+* SW during the IDA contributed heat maps studying the distribution of the population of diabetes patients. For the analysis, SW worked on developing the $k$-NN model. SW helped put together the final report.
 
 
