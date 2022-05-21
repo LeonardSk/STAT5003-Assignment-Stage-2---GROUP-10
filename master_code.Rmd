@@ -65,7 +65,19 @@ package_list <- c("broom"
 map(package_list, ~install.custom(.x))
 ```
 
-# Train/Test Split
+## 1. Problem
+Hospitalized diabetes patients have a higher risk of hospital readmission after discharge compared to the general population of hospitalized patients. This generates significant burden to the patients as well as the health care system. Therefore, identifying the diabetes patients that have the potential to be readmitted to hospital is an important health care target. In this study, we aim to generate an effective classification algorithm to predict whether the diabetes patients will be readmitted to hospital within 30 days or after 30 days of discharge, or will not be readmitted to hospital. This will provide valuable information for improving the management of targeted patients and help ease the burden on the healthcare system. 
+
+
+## 2. Initial data analysis
+
+The oveorall methodology of the current study is summarized in Figure 1.
+```{r echo=FALSE, fig.cap="Figure 1. The methodology used in the current study.",  out.width = '100%'}
+knitr::include_graphics("figure1.png")
+```
+
+
+###  Train/Test Split
 Cleaned data was imported and train/test split was performed where 80% will go to train and 20% will go to test. 
 
 ```{r, echo = F}
@@ -80,7 +92,7 @@ train <- df[ inTrain, ]
 test  <- df[-inTrain, ]
 ```
 
-# Treating Imbalanced Class
+### Treating Imbalanced Class
 
 One of the issues about the dataset is imbalanced class. From the bar plot below it can be observed that the class variable is dominated by the 'NO' level. If this issue is not treated properly, the trained classifier will tend to be more biased towards the major class and potentially not making any predictions on the minor classes. 
 
@@ -264,7 +276,7 @@ barplot(prop.table(table(train_down$readmitted
 #write.csv(train_down,"train_down.csv", row.names = FALSE)
 ```
 
-# Feature Engineering
+## 3. Feature Engineering
 
 After performing train/test split and re-sampling, feature selection was performed to identify the potential subset of important features. Mutinomial Lasso regression was chosen as the feature selection algorithm as we aim to generate a simpler model with less features. Unlike Ridge regression that puts less weight on less important features, Lasso regression obtain the subset of predictors that minimizes prediction error by adding a regularization term to the cost function so coefficients for some variables are shrunk towards zero and being completely ignored.
 
@@ -325,5 +337,47 @@ coef_names_lasso <- coef(cv.out, s = 0)[[1]]
 selected_variables <- row.names(coef_names_lasso)[coef_names_lasso@i+1]
 #selected_variables
 ```
+
+## 4. Classification methods
+To find the best classification algorithm for the current data, we tried 5 different classification algorithms, including K-nearest neighbor, support vector machine, logistic regression, random forest and XGBoosting. The algorithm aims to identify the patients who will readmit to hospital within 30 days and after 30 days, therefore, We choose sensitivity as the metrics to evaluate the algorithms, and more specially, the sensitivity of the "<30 days" and ">30 days" class groups. Besides sensitivity, we also determined F1 score and ROC of each algorithm, which provide additional information on the performance of algorithms.The methods to choose the best algorithm is illustrated in Figure 1. Firstly, we trained each model with dataset either without balanced class (raw train dataset), or dataset with balanced class (SMOTE balanced dataset, repeat balanced dataset and downsample balanced dataset), to find the dataset with best sensitivity for the 2 classes. For random forest model, we also evaluated different functions, i.e. RandomForest, ranger and ordinal forest. Then hyper-parameter tuning was performed on each model using grid search cross validation (5 or 10 folds based on computational time of specific algorithms). For K-nearest neighbors, we.........  For suport vector machine, ........ For logistic regression,........ For random forest, we searched the hyper-parameters num.trees in (1000, 2000, 4000, 6000, 8000, 10000, and mtry in (2,3,4,5,6) with 5 fold cross validation. For XGBoosting,.... The optimized algorithms for each model were generated using best hyper-parameters. The performance of different algorithms was compared based on sensitivity score and computational time. 
+
+## 5. Results
+
+### 5.1 K-nearest Neighbour
+
+
+
+
+### 5.2 Decision Tree
+
+
+
+### 5.3 Support vector machine
+
+
+
+
+### 5.4 Random Forest
+
+Random forest algorithm had the best sensitivity score using downsample balanced data, with sensitivity of 39.8% for ">30 days" class, and sensitivity of 43.0% for "<30 days" class. Using raw data, repeat balanced data or SMOTE balanced data, the sensitivity for "<30 days" class is obviously lower, ranging from 0.2% to 4.3%. The sensitivity scores when using Random forest and ranger are similar but slightly better than ordinal forest, while ranger is much faster than Random forest, therefore, ranger was chosen in the current study. Hyper-parameter tuning showed that number of trees = 8000, and number of variables = 2 yield the best out of bag errors. Evaluating the model with best hyper-parameters showed sensitivity scores of the target groups were 42.61% and 41.64% respectively, and F1 scores were 42.7% and 22.4% respectively. The number of diagnosis was identified to be the most important variables in this classifier.
+
+```{r echo=FALSE, fig.cap="Figure 2. The sensitivity of random forest algorithms using different training dataset.", out.width = '60%'}
+knitr::include_graphics("figure2.png")
+```
+
+### 5.5 XGBoosting
+
+
+
+### 5.6 Model comparision
+
+
+
+## 6. Discussion and conclusion
+
+In the current study, the classifier radial SVM was identified to be the best classifier. It can be used to identify the diabetes patients who have potential to be readmitted to hospital within 30 days and after 30 days of discharge, with a sensitivity of ..% and ..% respectively. SVM......discuss something like why it is good.... KNN......discussion......Logistic regression.....discussion...... We used 2 ensemble algorithms in this study, random forest and XGBoosting, however, their performance was not better than SVM. Random forest is generally a powerful algorithm, it can handle large data with multiple variables. However, random forest can be biased when categorical variables have multiple levels. In our dataset, 14 out of 23 variables are multilevel variables, which may prevent the accuracy of random forest algorithm.xGBoosting.......discussion....
+
+There are a few ways to improve the classification. Firstly, the minority class "<30 days" and "> 30 days" can be combined, as the patients in these groups have similar clinical meanings, i.e. will be readmitted to hospital after discharge. This will change the multiclass classification problem into binary classification problem, and increase the observation number in the minority class, which will improve the performance of classifier. We can also increase the observation number of the minority classes, reduce categorical variable levels by recategorization, adjust the threshold to improve sensitivity in the current models. We can also try other classification algorithms, including 1) Linear discriminant analysis, which is capable with multiple class classification, or 2) Adaboosting, which algorithm can improve its performance by emphasizing the misclassified data, or 3) classification neural network, which can use a series of algorithms for classification problem, and is suitable for non-linear data, which our current data appears to be, although it may take longer computational time.
+
 
 
