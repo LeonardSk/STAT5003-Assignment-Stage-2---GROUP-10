@@ -69,31 +69,72 @@ map(package_list, ~install.custom(.x))
 Hospitalized diabetes patients have a higher risk of hospital readmission after discharge compared to the general population of hospitalized patients. This generates significant burden to the patients as well as the health care system. Therefore, identifying the diabetes patients that have the potential to be readmitted to hospital is an important health care target. In this study, we aim to generate an effective classification algorithm to predict whether the diabetes patients will be readmitted to hospital within 30 days or after 30 days of discharge, or will not be readmitted to hospital. This will provide valuable information for improving the management of targeted patients and help ease the burden on the healthcare system. 
 
 
-## 2. Initial data analysis
+## 2. Dataset description
 
-The oveorall methodology of the current study is summarized in Figure 1.
+
+## 3. Initial data analysis
+
+## 3.1 Missingness
+There are 11 variables containing missing values, as shown in Table below. Variables “Weight”, “medical_specialty” and
+“payer_code” contains 96.86%, 49.08% or 39.56% missing data respectively, therefore, were removed from further analysis.
+“admission_id” is not relevant to the readmission outcome, hence it was dropped from the analysis. The observations with
+missing value in “gender” were removed. The remaining features with missing values had a high distinct levels, therefore we
+further re-categorized these values to simplify the variables. The missing values were allocated to a suitable group.
+
+```{r echo=FALSE, fig.cap="Figure 1. Missingness summary",  out.width = '100%'}
+knitr::include_graphics("Missingness.png")
+```
+
+## 3.2 Feature value re-categorization
+There are some categorical variables contain many unique values. To assist further analysis, we have reduced the values by
+re-categorizing the values. This include features for diagnosis (reducing from over 700 values to 9 values), admission source
+(from 17 to 3), discharge disposition (from 26 to 2), admission type (from 7 to 3), and race (from 6 to 3). An example of the
+feature value re-categorization, the feature values for diagnosis before and after re-categorization, is visualized in the table
+and figure below.
+
+```{r echo=FALSE, fig.cap="Figure 2. Feature Re-categorization",  out.width = '100%'}
+knitr::include_graphics("Feature_recategorization.png")
+```
+
+## 3.3 Outliers Removal
+Based on the Interquartile Range rule, outliers were detected in features for number of lab procedures, number of medications
+and number of diagnoses, as shown in Figure 3.We have excluded the outliers from the above 3 features, which means dropping
+around 2.8% (2948) observations.
+
+```{r echo=FALSE, fig.cap="Figure 3. Outliers detection",  out.width = '100%'}
+knitr::include_graphics("Outliers.png")
+```
+
+## 3.4 Feature Correlation
+To understand the correlation of numerical predictors in the data, a correlation matrix was produced. It can be observed
+that time in hospital forms a positive correlation with number of medication, lab procedures, procedures and number of
+diagnoses. Number of medications also forms a relatively strong positive correlation with the number of procedures and
+number of diagnoses. In addition, it is shown that when the number of emergency increases, number of inpatient will increase.
+
+```{r echo=FALSE, fig.cap="Figure 4. Outliers detection",  out.width = '100%'}
+knitr::include_graphics("Correlation.png")
+```
+
+## 3.5 2D Heat maps
+We generate 2D heat maps to study the distribution of race, number of diagnosis, diabetes medication and insulin category
+in different age group. The brightness scale is logarithmic for visual purposes. We find that the majority of patients are
+Caucasian and in the age range of 70 - 80. Most patients have had multiple diagnoses entered into the system and are already
+on diabetes medication.
+
+```{r echo=FALSE, fig.cap="Figure 5. 2D Heat Maps",  out.width = '100%'}
+knitr::include_graphics("IDA_heat_map.png")
+```
+
+## 4. Approach 
+The overall methodology of the current study is summarized in Figure 1.
 ```{r echo=FALSE, fig.cap="Figure 1. The methodology used in the current study.",  out.width = '100%'}
 knitr::include_graphics("figure1.png")
 ```
 
-
-###  Train/Test Split
+## 5. Train/Test Split
 Cleaned data was imported and train/test split was performed where 80% will go to train and 20% will go to test. 
 
-```{r, echo = F}
-df = read.csv('diabetic_data_clean_S1.csv', header = TRUE)
-df  <- select(df, -1) #remove row number
-df <- df %>% select(-c('encounter_id', 'patient_nbr'))
-```
-
-```{r, echo = F}
-inTrain <- createDataPartition(df$readmitted, p = .8)[[1]]
-train <- df[ inTrain, ]
-test  <- df[-inTrain, ]
-```
-
-### Treating Imbalanced Class
-
+## 6.Treating Imbalanced Class
 One of the issues about the dataset is imbalanced class. From the bar plot below it can be observed that the class variable is dominated by the 'NO' level. If this issue is not treated properly, the trained classifier will tend to be more biased towards the major class and potentially not making any predictions on the minor classes. 
 
 Therefore, to treat the imbalanced class issue, several techniques were perform as follows:
@@ -103,261 +144,43 @@ Therefore, to treat the imbalanced class issue, several techniques were perform 
 
 With oversampling by replicating instances from minor classes, we first subset for the two minor classes: <30 and >30. Then we replicated instances 5 times and 2 times respectively for each class, in order to make the dataset more balanced. In this way, we didn't introduce any artificial instances but this is likely to result in overfitting where training accuracy maybe high but the model is not good at predicting for unseen data. 
 
-```{r, echo = F}
-#oversampling - replicating minority classes
-train.class1.raw <- subset(train, train$readmitted == '<30') # <30
-train.class2.raw <- subset(train,train$readmitted == 'NO') 
-train.class3.raw <- subset(train, train$readmitted == '>30') # >30
-
-#replicate class 1 5 times and class 3 1 time
-class1.rows= c(1:nrow(train.class1.raw))
-class1.times = 5
-train.class1.raw.rep <- train.class1.raw[rep(class1.rows,class1.times),]
-
-class3.rows = c(1:nrow(train.class3.raw))
-class3.times = 2
-train.class3.raw.rep <- train.class3.raw[rep(class3.rows,class3.times),]
-
-df_oversampled_rep <- rbind(train.class1.raw.rep, train.class2.raw, train.class3.raw.rep)
-
-#table(df_oversampled_rep$readmitted)
-```
-
 We also explored the option of SMOTE to oversample the minor classes. Instead of duplicating instances from the minority class that may lead to overfitting, SMOTE synthesizes new instances of the minority class between a random instance of the minority class and one of its k nearest neighbor (here K = 3). Given that most features in the data were categorical, one hot encoding was first performed. Since SMOTE generates new instances by calculating the distance between the random data point of the minority class and a random point of its neighbour, the raw results of new instances from SMOTE will generate decimals between 0 and 1. This adds no meaingful value to the data, therefore, an ifelse rule was created to round >0.5 to 1 and <0.5 to 0. Checks were also performed to ensure for each predictor, only one level will be 1 and the rest of the levels are 0. For new numerical instances, we also rounded the values to integer, aligning with the original data format. 
-
-```{r, echo = F}
-#one hot encoding
-#library(caret)
-dummy <- dummyVars(" ~ .", data=train)
-oh.df.train <- data.frame(predict(dummy, newdata = train))
-```
-
-```{r, echo = F}
-#training oversampling - SMOTE
-train.class1 <- subset(oh.df.train, oh.df.train$readmitted.30 == 1) #<30
-train.class2 <- subset(oh.df.train, oh.df.train$readmittedNO == 1)
-train.class3 <- subset(oh.df.train, oh.df.train$readmitted.30.1 == 1) # >30
-
-
-new.train.class.1 <- SMOTE(train.class1,train.class1[,"readmitted.30"],K =3, dup_size = 4)
-new.train.class.3 <- SMOTE(train.class3,train.class3[,"readmitted.30.1"],K =3, dup_size = 1)
-
-new.train.class.1 <- new.train.class.1$data
-new.train.class.3 <- new.train.class.3$data
-
-new.train.class.1 <- new.train.class.1[,-ncol(new.train.class.1)]
-new.train.class.3 <- new.train.class.3[,-ncol(new.train.class.3)]
-```
-
-```{r, echo = F}
-df_smote_train <- rbind(new.train.class.1, train.class2, new.train.class.3 )
-
-#getting label back
-#class1
-class1 <- subset(df_smote_train, df_smote_train$readmitted.30 == 1) #<30 
-class1 <- class1 %>% select(-c('readmitted.30.1', 'readmittedNO', 'readmitted.30'))
-class1$readmitted <- "<30"
-
-#class2
-class2 <- subset(df_smote_train, df_smote_train$readmittedNO == 1) #NO
-class2 <- class2 %>% select(-c('readmitted.30.1', 'readmitted.30','readmittedNO'))
-class2$readmitted <- "NO"
-
-#class3
-class3 <- subset(df_smote_train, df_smote_train$readmitted.30.1 == 1) #>30
-class3 <- class3 %>% select(-c('readmitted.30.1', 'readmitted.30','readmittedNO'))
-class3$readmitted <- ">30"
-
-#combine 3 classes with un-encoded labels
-df_smote_train_FINAL <- rbind(class1, class2, class3)
-
-#table(df_smote_train_FINAL$readmitted)
-```
-
-
-```{r, echo = F}
-#rounding for new instances
-#colnames(df_smote_train_FINAL)
-
-#for categorical factors that don't need rounding
-for (i in c(1:15, 20:46, 48:87)){
-  df_smote_train_FINAL[,i] <- ifelse(df_smote_train_FINAL[,i] >0.5,1,0)
-}
-
-#rounding numerical features to integer
-for (i in c(16:19, 47)){
-  df_smote_train_FINAL[,i] <- round(df_smote_train_FINAL[,i],0)
-}
-```
-
-
-```{r, echo = F}
-#doing checks to see if the rounding works
-#sum(rowSums(df_smote_train_FINAL[,88:90])) #this sum should equal to the number of rows
-#check <- df_smote_train_FINAL[rowSums(df_smote_train_FINAL[,1:3]) != 1,]
-```
 
 After oversampling techniques, the class distribution of the new data is approximately 4:3:3, which yields a more balanced dataset. 
 We also explored the option of downsampling, we first converted categorical predictors to factors as a preliminary feature engineering step for future model training, then we applied the downSample function to downsample the major classes 'NO' and '>30' class so that 3 classes are now balanced. However, although we didn't introduce new or artificial instances, we may potentially lose some useful information.
 
-```{r, echo = F}
-#DOWNSAMPLING
-# Convert character to factor in train data
-train$race <- factor(train$race)
-train$gender <- factor(train$gender)
-train$age <- factor(train$age, order = TRUE, levels = c("[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"))
-train$diag_1 <- factor(train$diag_1 )
-train$diag_2 <- factor(train$diag_2)
-train$diag_3 <- factor(train$diag_3)
-train$A1Cresult <- factor(train$A1Cresult)
-train$metformin <- factor(train$metformin)
-train$glipizide <- factor(train$glipizide)
-train$glyburide <- factor(train$glyburide)
-train$pioglitazone <- factor(train$pioglitazone)
-train$rosiglitazone <- factor(train$rosiglitazone)
-train$insulin  <- factor(train$insulin )
-train$change <- factor(train$change)
-train$diabetesMed <- factor(train$diabetesMed)
-train$readmitted <- factor(train$readmitted, order = TRUE, levels = c("NO", ">30", "<30"))
-train$admission_source <- factor(train$admission_source)
-train$discharge_disposition <- factor(train$discharge_disposition)
-train$admission_type <- factor(train$admission_type)
+```{r echo=FALSE, fig.cap="Figure 1. Class Distribution with different re-sampling techniques", out.width = '100%'}
+knitr::include_graphics("Treating_Imbalanced_Class.png")
 ```
 
-```{r, echo = F}
-#Downsampling
-train_down <- downSample(subset(train, select = -c(readmitted)), train[["readmitted"]], list = FALSE)
-
-names(train_down)[names(train_down) == "Class"] <- "readmitted"
-
-#table(train_down$readmitted)
-```
-
-```{r, echo = F, fig.width=8, fig.height=2.5}
-#producing graphs for 3 re-sampling techniques
-par(mfrow = c(1,4))
-
-barplot(prop.table(table(train$readmitted
-)),
-  xlab = "Class",
-  main = "Original Class Distribution", cex.main = 0.8, 
-  cex.axis = 0.6, cex.lab = 0.8)
-
-barplot(prop.table(table(df_oversampled_rep$readmitted
-)),
-  xlab = "Class",
-  main = "Oversampling by replication", cex.main = 0.8, 
-  cex.axis = 0.6, cex.lab = 0.8)
-
-barplot(prop.table(table(df_smote_train_FINAL$readmitted
-)),
-  xlab = "Class",
-  main = "Oversampling by SMOTE", cex.main = 0.8, 
-  cex.axis = 0.6, cex.lab = 0.8)
-
-barplot(prop.table(table(train_down$readmitted
-)),
-  xlab = "Class",
-  main = "Downsampling", cex.main = 0.8, 
-  cex.axis = 0.6, cex.lab = 0.8)
-
-```
-
-
-```{r, echo = F}
-#export to csv
-#testing
-#write.csv(test,"test_raw.csv", row.names = FALSE)
-
-#training
-#write.csv(train,"train_raw.csv", row.names = FALSE)
-#write.csv(df_oversampled_rep,"train_rep_oversampled.csv", row.names = FALSE)
-#write.csv(df_smote_train_FINAL,"train_SMOTE_oversampled.csv", row.names = FALSE)
-#write.csv(train_down,"train_down.csv", row.names = FALSE)
-```
-
-## 3. Feature Engineering
+## 7. Feature Engineering
 
 After performing train/test split and re-sampling, feature selection was performed to identify the potential subset of important features. Mutinomial Lasso regression was chosen as the feature selection algorithm as we aim to generate a simpler model with less features. Unlike Ridge regression that puts less weight on less important features, Lasso regression obtain the subset of predictors that minimizes prediction error by adding a regularization term to the cost function so coefficients for some variables are shrunk towards zero and being completely ignored.
 
 A grid was generated to identify the best lambda in Lasso as we aim to find the balance between simplicity and model fit that minimizes the mse in cross validation. A 10-fold cross-validation for Lasso was performed with standardization to address the issue that variables are sharing different units. In the result, the best lambda that minimizes the cross-validation error was 0.0006. 
 
-```{r , echo = F, fig.show="hide"}
-# train/test split
-inTrain <- createDataPartition(df$readmitted, p = .8)[[1]]
-train <- df[ inTrain, ]
-test  <- df[-inTrain, ]
-
-# Selecting the Numerical Columns
-num_cols <- unlist(lapply(train, is.numeric))
-num_cols <- names(num_cols[which(num_cols)])
-
-# Selecting Categorical Columns
-cat_cols <- unlist(lapply(train, is.character))
-cat_cols <- names(cat_cols[which(cat_cols)])
-
-
-# Label Encoding
-encode_ordinal <- function(x, order = unique(x)) {
-  x <- as.numeric(factor(x, levels = order, exclude = NULL))
-  x
-}
-
-for (i in 1:length(cat_cols)){
-  train[[cat_cols[i]]] <- encode_ordinal(train[[cat_cols[i]]])
-}
-
-
-df_x <- train %>% select(-c('readmitted'))
-df_y <- train %>% select(c('readmitted'))
-
-x <- as.matrix(df_x)
-y <- as.double(as.matrix(df_y))
-
-#set alpha = 1 for Lasso
-#multinomial for multi class classification
-grid <- 10^seq(8,-2, length=100)
-
-cv.out <- cv.glmnet(x, y, family = 'multinomial', alpha=1, standardize = TRUE, type.measure = 'mse')
-
-plot(cv.out)
-```
-
-```{r, echo = F}
-#choosing best lambda
-bestlam <- cv.out$lambda.min
-#bestlam
-```
-
 A subset of features were selected by Lasso. Lasso shrinks the model down from 23 predictors to 12 predictors and identifying race, gender, age, diag_3, number_diagnoses, admissiong_source, discharge_disposition, admission_type and some other medications as important features. However, one of the pitfalls of Lasso regression is that it does not provide much interpretability on why such features were selected, hence trial and error was conducted in later modelling stage to test if using Lasso selected features only will yield a better model against using all features.
 
-```{r, echo = F}
-# subset of features
-coef_names_lasso <- coef(cv.out, s = 0)[[1]]
-selected_variables <- row.names(coef_names_lasso)[coef_names_lasso@i+1]
-#selected_variables
-```
-
-## 4. Classification methods
+## 8. Classification methods
 To find the best classification algorithm for the current data, we tried 5 different classification algorithms, including K-nearest neighbor, support vector machine, logistic regression, random forest and XGBoosting. The algorithm aims to identify the patients who will readmit to hospital within 30 days and after 30 days, therefore, We choose sensitivity as the metrics to evaluate the algorithms, and more specially, the sensitivity of the "<30 days" and ">30 days" class groups. Besides sensitivity, we also determined F1 score and ROC of each algorithm, which provide additional information on the performance of algorithms.The methods to choose the best algorithm is illustrated in Figure 1. Firstly, we trained each model with dataset either without balanced class (raw train dataset), or dataset with balanced class (SMOTE balanced dataset, repeat balanced dataset and downsample balanced dataset), to find the dataset with best sensitivity for the 2 classes. For random forest model, we also evaluated different functions, i.e. RandomForest, ranger and ordinal forest. Then hyper-parameter tuning was performed on each model using grid search cross validation (5 or 10 folds based on computational time of specific algorithms). For K-nearest neighbors, we.........  For suport vector machine, ........ For logistic regression,........ For random forest, we searched the hyper-parameters num.trees in (1000, 2000, 4000, 6000, 8000, 10000, and mtry in (2,3,4,5,6) with 5 fold cross validation. For XGBoosting,.... The optimized algorithms for each model were generated using best hyper-parameters. The performance of different algorithms was compared based on sensitivity score and computational time. 
 
-## 5. Results
+## 9. Results
 
-### 5.1 K-nearest Neighbour
-
-
-
-
-### 5.2 Decision Tree
-
-
-
-### 5.3 Support vector machine
+### 9.1 K-nearest Neighbour
 
 
 
 
-### 5.4 Random Forest
+### 9.2 Decision Tree
+
+
+
+### 9.3 Support vector machine
+
+
+
+
+### 9.4 Random Forest
 
 Random forest algorithm had the best sensitivity score using downsample balanced data, with sensitivity of 39.8% for ">30 days" class, and sensitivity of 43.0% for "<30 days" class. Using raw data, repeat balanced data or SMOTE balanced data, the sensitivity for "<30 days" class is obviously lower, ranging from 0.2% to 4.3%. The sensitivity scores when using Random forest and ranger are similar but slightly better than ordinal forest, while ranger is much faster than Random forest, therefore, ranger was chosen in the current study. Hyper-parameter tuning showed that number of trees = 8000, and number of variables = 2 yield the best out of bag errors. Evaluating the model with best hyper-parameters showed sensitivity scores of the target groups were 42.61% and 41.64% respectively, and F1 scores were 42.7% and 22.4% respectively. The number of diagnosis was identified to be the most important variables in this classifier.
 
@@ -365,15 +188,15 @@ Random forest algorithm had the best sensitivity score using downsample balanced
 knitr::include_graphics("figure2.png")
 ```
 
-### 5.5 XGBoosting
+### 9.5 XGBoosting
 
 
 
-### 5.6 Model comparision
+### 9.6 Model comparision
 
 
 
-## 6. Discussion and conclusion
+## 10. Discussion and conclusion
 
 In the current study, the classifier radial SVM was identified to be the best classifier. It can be used to identify the diabetes patients who have potential to be readmitted to hospital within 30 days and after 30 days of discharge, with a sensitivity of ..% and ..% respectively. SVM......discuss something like why it is good.... KNN......discussion......Logistic regression.....discussion...... We used 2 ensemble algorithms in this study, random forest and XGBoosting, however, their performance was not better than SVM. Random forest is generally a powerful algorithm, it can handle large data with multiple variables. However, random forest can be biased when categorical variables have multiple levels. In our dataset, 14 out of 23 variables are multilevel variables, which may prevent the accuracy of random forest algorithm.xGBoosting.......discussion....
 
