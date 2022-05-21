@@ -273,7 +273,7 @@ There are a few ways to improve the classification. Firstly, the minority class 
 ## Contribution Statement
 All members of the group contributed equally to the project. More specifically, the following was completed by each member:
 
-* HL
+* HL during the IDA contributed to problem introduction and report compiling. For the report 2, HL worked on developing Random Forest algorithm, and contributed to the Random Forest section and future improvement section in the report.  
 * JC
 * JS
 * LS
