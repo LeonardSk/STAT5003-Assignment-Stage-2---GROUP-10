@@ -178,9 +178,15 @@ For random forest, we searched the hyper-parameters num.trees in (1000, 2000, 40
 
 
 <<<<<<< HEAD
-### 9.2 Random Forest
-=======
 
+### 9.2 Random Forest
+>>>>>>> cba728ab90f9fbae557fc92a72f13463bfdec1e9
+
+Random forest algorithm had the best sensitivity score using downsample balanced data, with sensitivity of 39.8% for ">30 days" class, and sensitivity of 43.0% for "<30 days" class. Using raw data, repeat balanced data or SMOTE balanced data, the sensitivity for "<30 days" class is obviously lower, ranging from 0.2% to 4.3%. The sensitivity scores when using Random forest and ranger are similar but slightly better than ordinal forest, while ranger is much faster than Random forest, therefore, ranger was chosen in the current study. Hyper-parameter tuning showed that number of trees = 8000, and number of variables = 2 yield the best out of bag errors. Evaluating the model with best hyper-parameters showed sensitivity scores of the target groups were 42.61% and 41.64% respectively, and F1 scores were 42.7% and 22.4% respectively. The number of diagnosis was identified to be the most important variables in this classifier.
+
+```{r echo=FALSE, fig.cap="The sensitivity of random forest algorithms using different training dataset.", out.width = '60%', fig.align="center"}
+knitr::include_graphics("figure2.png")
+```
 
 ### 9.3 Support vector machine
 As mentioned previously, the best SVM result is obtained from SMOTE balanced dataset with all features with the sensitivity of 47.59% for class "<30 days", 47.16% for class ">30 days", and 43.4% for class "No". 
@@ -197,20 +203,6 @@ All the experiments were using the best hyper-parameters as seen below:
 - Kernel: Radial based
 - Gamma: 1
 - C: 1
-
-
-### 9.4 Random Forest
->>>>>>> cba728ab90f9fbae557fc92a72f13463bfdec1e9
-
-Random forest algorithm had the best sensitivity score using downsample balanced data, with sensitivity of 39.8% for ">30 days" class, and sensitivity of 43.0% for "<30 days" class. Using raw data, repeat balanced data or SMOTE balanced data, the sensitivity for "<30 days" class is obviously lower, ranging from 0.2% to 4.3%. The sensitivity scores when using Random forest and ranger are similar but slightly better than ordinal forest, while ranger is much faster than Random forest, therefore, ranger was chosen in the current study. Hyper-parameter tuning showed that number of trees = 8000, and number of variables = 2 yield the best out of bag errors. Evaluating the model with best hyper-parameters showed sensitivity scores of the target groups were 42.61% and 41.64% respectively, and F1 scores were 42.7% and 22.4% respectively. The number of diagnosis was identified to be the most important variables in this classifier.
-
-```{r echo=FALSE, fig.cap="The sensitivity of random forest algorithms using different training dataset.", out.width = '60%', fig.align="center"}
-knitr::include_graphics("figure2.png")
-```
-
-
-### 9.3 Support vector machine (Johan)
-
 
 ### 9.4 Logistic regression (Jenny)
 
