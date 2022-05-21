@@ -206,7 +206,7 @@ All the experiments were using the best hyper-parameters as seen below:
 
 ### 9.4 Logistic regression 
 For logistic regression, raw data with all features gives the best accuracy of 54%, however, the sensitivity is highly skewed with no instances predicted to be in the class '<30 days'. This caused problem as the two classes that we're most interested in is patients who readmitted. Data with lasso selected features also posed the same problem.
-We then tried other class balancing approaches and downsampled dataset gives the best result, in the sense that it has highest sensitivity for class "<30 days" (36.2%) and ">30 days" (44.0%) compared to oversampled dataset. Its accuracy is lower with more testing error, but overall predicts better for the minor classes and fits better for the purpose of our study. 
+We then tried other class balancing approaches and downsampled dataset gives the best result, in the sense that it has highest sensitivity for class "<30 days" (36.2%) and ">30 days" (44.0%) compared to oversampled dataset. Its accuracy is lower 42.8% with more testing error, but overall predicts better for the minor classes and fits better for the purpose of our study. In addition, running the algorithm takes around 15 seconds and is more computationally efficient.
 
 
 
