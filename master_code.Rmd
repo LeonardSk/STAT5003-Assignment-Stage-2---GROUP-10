@@ -2,9 +2,10 @@
 title: "Group 10 STAT5003 Assignment Report"
 author: "Group 10"
 date: "`r Sys.Date()`"
-geometry: margin=0.5in
 output:
   html_document: default
+  pdf_document: default
+geometry: margin=0.5in
 ---
 \vspace{-5truemm}
 
@@ -70,64 +71,64 @@ Hospitalized diabetes patients have a higher risk of hospital readmission after 
 
 
 ## 2. Dataset description
-
+For the purpose of this study, we used dataset ‘Diabetes 130-US hospitals for years 1999-2008 Data Set’ resourced from UCI Machine Learning repository, originally donated by Center for Clinical and Translational Research, Virginia Commonwealth University. The dataset represents 101,766 records of hospital admissions for patients diagnosed with diabetes across 130 US hospitals over a 10 year period (1999-2008). There are 55 categorical and numerical features in the dataset that capture a variety of demographical and clinical information about the patients. Readmission status will be the response variable that we aim to predict with our classification models, and is labeled with three classes, readmitted after 30 days of discharge, within 30 days or no record of being readmitted.
 
 ## 3. Initial data analysis
 
-## 3.1 Missingness
+### 3.1 Missingness
 There are 11 variables containing missing values, as shown in Table below. Variables “Weight”, “medical_specialty” and
 “payer_code” contains 96.86%, 49.08% or 39.56% missing data respectively, therefore, were removed from further analysis.
 “admission_id” is not relevant to the readmission outcome, hence it was dropped from the analysis. The observations with
 missing value in “gender” were removed. The remaining features with missing values had a high distinct levels, therefore we
 further re-categorized these values to simplify the variables. The missing values were allocated to a suitable group.
 
-```{r echo=FALSE, fig.cap="Figure 1. Missingness summary",  out.width = '100%'}
+```{r echo=FALSE, fig.cap="Figure 1. Missingness summary",  out.width = '30%', fig.align="center"}
 knitr::include_graphics("Missingness.png")
 ```
 
-## 3.2 Feature value re-categorization
+### 3.2 Feature value re-categorization
 There are some categorical variables contain many unique values. To assist further analysis, we have reduced the values by
 re-categorizing the values. This include features for diagnosis (reducing from over 700 values to 9 values), admission source
 (from 17 to 3), discharge disposition (from 26 to 2), admission type (from 7 to 3), and race (from 6 to 3). An example of the
 feature value re-categorization, the feature values for diagnosis before and after re-categorization, is visualized in the table
 and figure below.
 
-```{r echo=FALSE, fig.cap="Figure 2. Feature Re-categorization",  out.width = '100%'}
+```{r echo=FALSE, fig.cap="Figure 2. Feature Re-categorization",  out.width = '50%', fig.align="center"}
 knitr::include_graphics("Feature_recategorization.png")
 ```
 
-## 3.3 Outliers Removal
+### 3.3 Outliers Removal
 Based on the Interquartile Range rule, outliers were detected in features for number of lab procedures, number of medications
 and number of diagnoses, as shown in Figure 3.We have excluded the outliers from the above 3 features, which means dropping
 around 2.8% (2948) observations.
 
-```{r echo=FALSE, fig.cap="Figure 3. Outliers detection",  out.width = '100%'}
+```{r echo=FALSE, fig.cap="Figure 3. Outliers detection",  out.width = '60%', fig.align="center"}
 knitr::include_graphics("Outliers.png")
 ```
 
-## 3.4 Feature Correlation
+### 3.4 Feature Correlation
 To understand the correlation of numerical predictors in the data, a correlation matrix was produced. It can be observed
 that time in hospital forms a positive correlation with number of medication, lab procedures, procedures and number of
 diagnoses. Number of medications also forms a relatively strong positive correlation with the number of procedures and
 number of diagnoses. In addition, it is shown that when the number of emergency increases, number of inpatient will increase.
 
-```{r echo=FALSE, fig.cap="Figure 4. Outliers detection",  out.width = '100%'}
+```{r echo=FALSE, fig.cap="Figure 4. Feature correlation",  out.width = '35%', fig.align="center"}
 knitr::include_graphics("Correlation.png")
 ```
 
-## 3.5 2D Heat maps
+### 3.5 2D Heat maps
 We generate 2D heat maps to study the distribution of race, number of diagnosis, diabetes medication and insulin category
 in different age group. The brightness scale is logarithmic for visual purposes. We find that the majority of patients are
 Caucasian and in the age range of 70 - 80. Most patients have had multiple diagnoses entered into the system and are already
 on diabetes medication.
 
-```{r echo=FALSE, fig.cap="Figure 5. 2D Heat Maps",  out.width = '100%'}
+```{r echo=FALSE, fig.cap="Figure 5. Figure 52D Heat Maps",  out.width = '60%', fig.align="center"}
 knitr::include_graphics("IDA_heat_map.png")
 ```
 
 ## 4. Approach 
 The overall methodology of the current study is summarized in Figure 1.
-```{r echo=FALSE, fig.cap="Figure 1. The methodology used in the current study.",  out.width = '100%'}
+```{r echo=FALSE, fig.cap="Figure 6. The methodology used in the current study.",  out.width = '70%', fig.align="center"}
 knitr::include_graphics("figure1.png")
 ```
 
@@ -149,7 +150,7 @@ We also explored the option of SMOTE to oversample the minor classes. Instead of
 After oversampling techniques, the class distribution of the new data is approximately 4:3:3, which yields a more balanced dataset. 
 We also explored the option of downsampling, we first converted categorical predictors to factors as a preliminary feature engineering step for future model training, then we applied the downSample function to downsample the major classes 'NO' and '>30' class so that 3 classes are now balanced. However, although we didn't introduce new or artificial instances, we may potentially lose some useful information.
 
-```{r echo=FALSE, fig.cap="Figure 1. Class Distribution with different re-sampling techniques", out.width = '100%'}
+```{r echo=FALSE, fig.cap="Figure 7. Class Distribution with different re-sampling techniques", out.width = '90%', fig.align="center"}
 knitr::include_graphics("Treating_Imbalanced_Class.png")
 ```
 
@@ -166,33 +167,32 @@ To find the best classification algorithm for the current data, we tried 5 diffe
 
 ## 9. Results
 
-### 9.1 K-nearest Neighbour
+### 9.1 K-nearest Neighbour (Simon)
 
 
 
 
-### 9.2 Decision Tree
 
-
-
-### 9.3 Support vector machine
-
-
-
-
-### 9.4 Random Forest
+### 9.2 Random Forest
 
 Random forest algorithm had the best sensitivity score using downsample balanced data, with sensitivity of 39.8% for ">30 days" class, and sensitivity of 43.0% for "<30 days" class. Using raw data, repeat balanced data or SMOTE balanced data, the sensitivity for "<30 days" class is obviously lower, ranging from 0.2% to 4.3%. The sensitivity scores when using Random forest and ranger are similar but slightly better than ordinal forest, while ranger is much faster than Random forest, therefore, ranger was chosen in the current study. Hyper-parameter tuning showed that number of trees = 8000, and number of variables = 2 yield the best out of bag errors. Evaluating the model with best hyper-parameters showed sensitivity scores of the target groups were 42.61% and 41.64% respectively, and F1 scores were 42.7% and 22.4% respectively. The number of diagnosis was identified to be the most important variables in this classifier.
 
-```{r echo=FALSE, fig.cap="Figure 2. The sensitivity of random forest algorithms using different training dataset.", out.width = '60%'}
+```{r echo=FALSE, fig.cap="The sensitivity of random forest algorithms using different training dataset.", out.width = '60%', fig.align="center"}
 knitr::include_graphics("figure2.png")
 ```
 
-### 9.5 XGBoosting
+
+### 9.3 Support vector machine (Johan)
+
+
+### 9.4 Logistic regression (Jenny)
+
+
+### 9.5 XGBoosting (Leonoard)
 
 
 
-### 9.6 Model comparision
+### 9.6 Model comparision (Leonoard)
 
 
 
