@@ -274,7 +274,7 @@ There are a few ways to improve the classification. Firstly, the minority class 
 All members of the group contributed equally to the project. More specifically, the following was completed by each member:
 
 * HL
-* JC
+* JC wrote initial report about dataset description and challenges. For Deliverable 2, JC worked on developing multinomial logistic regression and helped with compiling the final report.
 * JS wrote an initial report about project plan, decide what are the algorithms should be employed in this project and how to measure them to get a fair comparison. JS during the modelling contributed to SVM model started from hyper-parameters tuning, feature selection, and trying different datasets as well. Then assessed those experiments
 * LS
 * ML during the IDA contributed to missingness and outliers identification and  feature correlation. For Deliverable 2, ML worked on train/test split, treating imbalanced class and feature selection. ML also compiled the presentation slides and pre-recorded the content.  
