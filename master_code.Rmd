@@ -275,7 +275,7 @@ All members of the group contributed equally to the project. More specifically, 
 
 * HL
 * JC
-* JS
+* JS wrote an initial report about project plan, decide what are the algorithms should be employed in this project and how to measure them to get a fair comparison. JS during the modelling contributed to SVM model started from hyper-parameters tuning, feature selection, and trying different datasets as well. Then assessed those experiments
 * LS
 * ML during the IDA contributed to missingness and outliers identification and  feature correlation. For Deliverable 2, ML worked on train/test split, treating imbalanced class and feature selection. ML also compiled the presentation slides and pre-recorded the content.  
 * SW during the IDA contributed heat maps studying the distribution of the population of diabetes patients. For the analysis, SW worked on developing the $k$-NN model. SW helped put together the final report.
